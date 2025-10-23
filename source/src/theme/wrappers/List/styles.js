@@ -1,7 +1,7 @@
-import { makeStyles } from '@material-ui/core/styles'
-
-export default makeStyles(() => ({
+const styles = {
   options: {
     width: '100%'
   }
-}))
+}
+
+export default styles

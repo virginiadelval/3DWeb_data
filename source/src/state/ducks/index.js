@@ -15,8 +15,11 @@ import seeker from './seeker'
 import tour from './tour'
 import uses from './uses'
 import works from './works'
+import IFC from './IFC'
+import patrimony from './patrimony'
 
 export default combineReducers({
+  IFC,
   alerts,
   categories,
   contact,
@@ -31,5 +34,6 @@ export default combineReducers({
   works,
   inspections,
   tour,
-  reports
+  reports,
+  patrimony
 })

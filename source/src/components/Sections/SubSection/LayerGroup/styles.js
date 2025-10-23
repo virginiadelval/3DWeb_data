@@ -1,6 +1,6 @@
-import { makeStyles } from '@material-ui/core/styles'
+import theme from 'theme'
 
-export default makeStyles((theme) => ({
+const styles = {
   paper: {
     width: theme.spacing(45), // 45    - 360px
     paddingTop: theme.spacing(2.25), // 2.25 -  18px
@@ -11,4 +11,6 @@ export default makeStyles((theme) => ({
   button: {
     padding: 0
   }
-}))
+}
+
+export default styles

@@ -24,8 +24,9 @@ export default function App({ isAuthenticated }) {
     dispatch(actions.isVisibleTour(true))
     localStorage.setItem('isModalOpen', 'true')
   }
+
   const handleClose = () => {
-    dispatch((actions.isVisibleTour(false)))
+    dispatch(actions.isVisibleTour(false))
   }
 
   useEffect(() => {
@@ -35,7 +36,7 @@ export default function App({ isAuthenticated }) {
   }, [isMapReady, dispatch])
 
   return (
-    <div>
+    <>
       <BrowserRouter>
         <Routes authed={isAuthenticated} />
       </BrowserRouter>
@@ -44,10 +45,11 @@ export default function App({ isAuthenticated }) {
         steps={largeScreenSteps}
         isOpen={isModalOpen}
         onRequestClose={handleClose}
+        maskSpace={1}
         className="tour"
         startAt={0}
       />
-    </div>
+    </>
   )
 }
 

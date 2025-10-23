@@ -2,11 +2,9 @@ import React from 'react'
 
 import PropTypes from 'prop-types'
 
-import {
-  Box, Typography, IconButton
-} from '@material-ui/core'
-import ArrowBackIcon from '@material-ui/icons/ArrowBack'
-import InfoOutlinedIcon from '@material-ui/icons/InfoOutlined'
+import { Box, Typography, IconButton } from '@mui/material'
+import ArrowBackIcon from '@mui/icons-material/ArrowBack'
+import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined'
 
 import CustomTooltip from 'theme/wrappers/CustomTooltip'
 
@@ -15,54 +13,57 @@ import { actions as categoriesActions } from 'state/ducks/categories'
 
 import { useDispatch } from 'react-redux'
 
-import useFontsStyles from 'theme/fontsDecorators'
-import useStyles from './headerSectionStyles'
+import decorators from 'theme/fontsDecorators'
+import styles from './headerSectionStyles'
 
 const HeaderSection = ({ categoryTitle, sectionTitle, info }) => {
-  const classes = useStyles()
-  const decorators = useFontsStyles()
   const dispatch = useDispatch()
 
   return (
-    <Box className={classes.container}>
-      <Typography variant="h5" className={`${decorators.bold} ${decorators.marginBottom_ml}`}>
+    <Box sx={styles.container}>
+      <Typography
+        variant="h5"
+        sx={{
+          ...decorators['bold'],
+          ...decorators['marginBottom_ml'],
+          ...styles['informationTitle']
+        }}
+      >
         {categoryTitle}
       </Typography>
-      {
-        sectionTitle && (
-          <Box className={classes.subTitle}>
-            <Box className={info ? classes.sectionTitle : ''}>
-              <Typography variant="h6" className={decorators.bold}>
-                <IconButton
-                  onClick={() => {
-                    dispatch(categoriesActions.sectionBack())
-                    dispatch(alertsAction.clear())
-                  }}
-                  className={classes.button}
-                >
-                  <ArrowBackIcon />
-                </IconButton>
-                {sectionTitle}
-              </Typography>
-            </Box>
-            {
-              info && (
-                <Box className={classes.boxIcons}>
-                  <CustomTooltip
-                    className={classes.tooltip}
-                    title={info}
-                    placement="top"
-                  >
-                    <InfoOutlinedIcon
-                      className={classes.info}
-                    />
-                  </CustomTooltip>
-                </Box>
-              )
-            }
+      {sectionTitle && (
+        <Box sx={styles.subTitle}>
+          <Box sx={info ? styles.sectionTitle : null}>
+            <Typography
+              variant="h6"
+              sx={{
+                ...decorators['bold'],
+                ...styles['sectionTitleTypography']
+              }}
+            >
+              <IconButton
+                onClick={() => {
+                  dispatch(categoriesActions.sectionBack())
+                  dispatch(alertsAction.clear())
+                }}
+                sx={styles.button}
+                aria-label="go-back"
+                size="small"
+              >
+                <ArrowBackIcon fontSize="small" />
+              </IconButton>
+              {sectionTitle}
+            </Typography>
           </Box>
-        )
-      }
+          {info ? (
+            <Box sx={styles.boxIcons}>
+              <CustomTooltip sx={styles.tooltip} title={info} placement="top">
+                <InfoOutlinedIcon sx={styles.info} />
+              </CustomTooltip>
+            </Box>
+          ) : null}
+        </Box>
+      )}
     </Box>
   )
 }

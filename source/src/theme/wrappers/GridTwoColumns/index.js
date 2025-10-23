@@ -2,47 +2,65 @@ import React from 'react'
 
 import PropTypes from 'prop-types'
 
-import {
-  Grid, FormControlLabel, Checkbox, Typography
-} from '@material-ui/core'
-import useFontsStyles from 'theme/fontsDecorators'
+import { Grid, FormControlLabel, Checkbox, Typography } from '@mui/material'
+import decorators from 'theme/fontsDecorators'
 
-import CheckBoxIcon from '@material-ui/icons/CheckBox'
-import CheckBoxOutlineBlankIcon from '@material-ui/icons/CheckBoxOutlineBlank'
+import CheckBoxIcon from '@mui/icons-material/CheckBox'
+import CheckBoxOutlineBlankIcon from '@mui/icons-material/CheckBoxOutlineBlank'
 
 import { actions } from 'state/ducks/explorer'
 
 import { useDispatch, useSelector } from 'react-redux'
 
-import useStyles from './styles'
+import styles from './styles'
 
 const GridItems = ({
-  decorators, title, idLayer, idExplorer: idExp, id: idItem
+  decorators,
+  title,
+  idLayer,
+  idExplorer: idExp,
+  id: idItem
 }) => {
-  const classes = useStyles()
   const dispatch = useDispatch()
-  const isChecked = useSelector((state) => state.explorer.options[idExp][idItem].isVisible)
+  const isChecked = useSelector(
+    (state) => state.explorer.options[idExp][idItem].isVisible
+  )
 
   const handleChange = (idExplorer, itemId, isVisible) => {
-    dispatch(actions.checkChange({
-      idLayer, idExplorer, itemId, isVisible
-    }))
+    dispatch(
+      actions.checkChange({
+        idLayer,
+        idExplorer,
+        itemId,
+        isVisible
+      })
+    )
   }
 
   return (
     <Grid item xs={6}>
       <FormControlLabel
-        className={classes.formControl}
+        sx={styles.formControl}
         onChange={(_, isCheck) => handleChange(idExp, idItem, isCheck)}
-        control={(
+        control={
           <Checkbox
             checked={isChecked}
-            icon={<CheckBoxOutlineBlankIcon fontSize="small" style={{ color: '#333' }} />}
-            checkedIcon={<CheckBoxIcon fontSize="small" style={{ color: '#333' }} />}
+            icon={
+              <CheckBoxOutlineBlankIcon
+                fontSize="small"
+                style={{ color: '#333' }}
+              />
+            }
+            checkedIcon={
+              <CheckBoxIcon fontSize="small" style={{ color: '#333' }} />
+            }
           />
-        )}
+        }
       />
-      <Typography variant="caption" className={`${decorators.marginTop_md} ${decorators.marginBottom_xl}`}>
+      <Typography
+        variant="caption"
+        sx={`${decorators.marginTop_md} ${decorators.marginBottom_xl}`}
+      >
         {title}
       </Typography>
     </Grid>
@@ -51,7 +69,6 @@ const GridItems = ({
 
 const GridTwoColumns = ({ idExplorer, idGroup, items }) => {
   const dispatch = useDispatch()
-  const decorators = useFontsStyles()
 
   const handleChangeAllSelected = (idExp, idG, isSelected) => {
     dispatch(actions.allSelected({ idExp, idG, isSelected }))
@@ -64,31 +81,36 @@ const GridTwoColumns = ({ idExplorer, idGroup, items }) => {
     <Grid container spacing={0}>
       <FormControlLabel
         style={{ paddingLeft: '10px' }}
-        control={(
+        control={
           <Checkbox
             defaultChecked
-            onChange={(_, isSelected) => handleChangeAllSelected(idExplorer, idGroup, isSelected)}
-            icon={<CheckBoxOutlineBlankIcon fontSize="small" style={{ color: '#333' }} />}
-            checkedIcon={<CheckBoxIcon fontSize="small" style={{ color: '#333' }} />}
+            onChange={(_, isSelected) =>
+              handleChangeAllSelected(idExplorer, idGroup, isSelected)
+            }
+            icon={
+              <CheckBoxOutlineBlankIcon
+                fontSize="small"
+                style={{ color: '#333' }}
+              />
+            }
+            checkedIcon={
+              <CheckBoxIcon fontSize="small" style={{ color: '#333' }} />
+            }
           />
-        )}
+        }
         label="Seleccionar todos"
       />
-      {
-        items.map(({
-          title, id, idLayer, filter
-        }) => (
-          <GridItems
-            key={id}
-            idExplorer={idExplorer}
-            id={id}
-            decorators={decorators}
-            title={title}
-            idLayer={idLayer}
-            filter={filter}
-          />
-        ))
-      }
+      {items.map(({ title, id, idLayer, filter }) => (
+        <GridItems
+          key={id}
+          idExplorer={idExplorer}
+          id={id}
+          decorators={decorators}
+          title={title}
+          idLayer={idLayer}
+          filter={filter}
+        />
+      ))}
     </Grid>
   )
 }

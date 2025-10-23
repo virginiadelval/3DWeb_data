@@ -1,15 +1,21 @@
-import { withStyles } from '@material-ui/core'
+import Tooltip from '@mui/material/Tooltip'
 
-import Tooltip from '@material-ui/core/Tooltip'
-
-const CustomTooltip = withStyles((theme) => ({
-  tooltip: {
-    backgroundColor: '#f5f5f9',
-    color: 'rgba(0, 0, 0, 0.87)',
-    maxWidth: 220,
-    fontSize: theme.typography.pxToRem(14),
-    border: '1px solid #dadde9'
-  }
-}))(Tooltip)
+const CustomTooltip = (props) => (
+  <Tooltip
+    slotProps={{
+      tooltip: {
+        sx: {
+          backgroundColor: '#f5f5f9',
+          maxWidth: '220px',
+          border: '1px solid #dadde9',
+          fontSize: '12px',
+          color: 'rgba(0, 0, 0, 0.67)',
+          fontWeight: '500'
+        }
+      }
+    }}
+    {...props}
+  />
+)
 
 export default CustomTooltip

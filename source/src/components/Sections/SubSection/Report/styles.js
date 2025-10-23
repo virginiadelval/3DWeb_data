@@ -1,6 +1,5 @@
-import { makeStyles } from '@material-ui/core/styles'
-
-export default makeStyles((theme) => ({
+import theme from 'theme'
+const styles = {
   card: {
     padding: theme.spacing(1),
     marginBottom: theme.spacing(2),
@@ -13,4 +12,5 @@ export default makeStyles((theme) => ({
     padding: 0,
     float: 'right'
   }
-}))
+}
+export default styles

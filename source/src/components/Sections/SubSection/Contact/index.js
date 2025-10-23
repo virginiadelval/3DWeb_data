@@ -8,13 +8,10 @@ import ReCAPTCHA from 'react-google-recaptcha'
 
 import ContainerBar from 'components/Sections/ContainerBar'
 
-import {
-  Grid, Typography, Button, TextField
-} from '@material-ui/core'
-import useStyles from './styles'
+import { Grid, Typography, Button, TextField } from '@mui/material'
+import styles from './styles'
 
 const Contact = () => {
-  const classes = useStyles()
   const dispatch = useDispatch()
 
   // Validaciones
@@ -39,14 +36,20 @@ const Contact = () => {
 
   const validate = () => {
     const values = {}
-    values.nameValue = nameValue !== ''
-      ? ['correct', setErrorName(false)] : ['incorrect', setErrorName(true)]
-    values.emailValue = (/\S+@\S+\.\S+/).test(emailValue)
-      ? ['correct', setErrorMail(false)] : ['incorrect', setErrorMail(true)]
-    values.comentValue = comentValue !== ''
-      ? ['correct', setErrorComent(false)] : ['incorrect', setErrorComent(true)]
+    values.nameValue =
+      nameValue !== ''
+        ? ['correct', setErrorName(false)]
+        : ['incorrect', setErrorName(true)]
+    values.emailValue = /^[\w.%+-]+@[\w.-]+\.[A-Za-z]{2,}$/.test(emailValue)
+      ? ['correct', setErrorMail(false)]
+      : ['incorrect', setErrorMail(true)]
+    values.comentValue =
+      comentValue !== ''
+        ? ['correct', setErrorComent(false)]
+        : ['incorrect', setErrorComent(true)]
     values.captchaValue = captchaValue
-      ? ['correct'] : ['incorrect', setCaptchaValue(false)]
+      ? ['correct']
+      : ['incorrect', setCaptchaValue(false)]
 
     return Object.values(values).every((v) => v[0] === 'correct')
   }
@@ -76,14 +79,12 @@ const Contact = () => {
   const statusEmail = useSelector((state) => state.contact.statusEmail)
 
   return (
-    <ContainerBar
-      type="list"
-    >
+    <ContainerBar type="list">
       <form onSubmit={handleSubmit}>
-        <Grid container className={classes.container}>
-          <Grid item className={classes.item}>
+        <Grid container sx={styles.container}>
+          <Grid item sx={styles.item}>
             <TextField
-              className={classes.textField}
+              sx={styles.textField}
               id="name"
               name="from_name"
               label="Nombre *"
@@ -93,21 +94,26 @@ const Contact = () => {
               helperText={errorName && 'Ingrese su nombre'}
             />
           </Grid>
-          <Grid item className={classes.item}>
+          <Grid item sx={styles.item}>
             <TextField
-              className={classes.textField}
+              sx={styles.textField}
               id="email"
               name="reply_to"
               label="Email *"
               value={emailValue}
               onChange={({ target: { value } }) => emailChange(value)}
               error={errorMail}
-              helperText={errorMail && (emailValue === '' ? 'Ingrese un email' : 'Ingrese un email valido')}
+              helperText={
+                errorMail &&
+                (emailValue === ''
+                  ? 'Ingrese un email'
+                  : 'Ingrese un email valido')
+              }
             />
           </Grid>
-          <Grid item className={classes.item}>
+          <Grid item sx={styles.item}>
             <TextField
-              className={classes.textField}
+              sx={styles.textField}
               id="outlined-multiline-static"
               name="message"
               label="Comentario *"
@@ -120,65 +126,42 @@ const Contact = () => {
               helperText={errorComent && 'Ingrese un comentario'}
             />
           </Grid>
-          <Grid item className={classes.item}>
-            <Typography className={classes.required}>
+          <Grid item sx={styles.item}>
+            <Typography sx={styles.required}>
               * los campos son obligatorios
             </Typography>
           </Grid>
-          <Grid item className={classes.captcha}>
+          <Grid item sx={styles.captcha}>
             <ReCAPTCHA
-              sitekey="6LfR8ewZAAAAAEQHqrlnwxlw_3ejpqCiqW436IKd"
-              // Gonzalo "6LdVAuMZAAAAADGeupnkf5fB37bNhbxah0asbDkX"
-              // Ariel   "6LfR8ewZAAAAAEQHqrlnwxlw_3ejpqCiqW436IKd"
               onChange={(e) => handleCaptcha(e)}
               name="captcha"
             />
-            {
-              captchaValue === false && (
-                <Typography className={classes.required}>
-                  Utilice el captcha
-                </Typography>
-              )
-            }
+            {captchaValue === false && (
+              <Typography sx={styles.required}>Utilice el captcha</Typography>
+            )}
           </Grid>
-          <Grid item className={classes.item}>
-            <Button
-              variant="contained"
-              type="submit"
-            >
+          <Grid item sx={styles.item}>
+            <Button variant="contained" type="submit">
               Enviar
             </Button>
           </Grid>
-          {
-            statusEmail === 'sending' && (
-              <Grid item className={classes.item}>
-                <Typography>
-                  ENVIANDO
-                </Typography>
-              </Grid>
-            )
-          }
-          {
-            statusEmail === 'success' && (
-              <Grid item className={classes.item}>
-                <Typography>
-                  ENVIADO CON ÉXITO
-                </Typography>
-              </Grid>
-            )
-          }
-          {
-            statusEmail === 'fail' && (
-              <Grid item className={classes.item}>
-                <Typography className={classes.required}>
-                  ERROR EL ENVIAR
-                </Typography>
-              </Grid>
-            )
-          }
+          {statusEmail === 'sending' && (
+            <Grid item sx={styles.item}>
+              <Typography>ENVIANDO</Typography>
+            </Grid>
+          )}
+          {statusEmail === 'success' && (
+            <Grid item sx={styles.item}>
+              <Typography>ENVIADO CON ÉXITO</Typography>
+            </Grid>
+          )}
+          {statusEmail === 'fail' && (
+            <Grid item sx={styles.item}>
+              <Typography sx={styles.required}>ERROR EL ENVIAR</Typography>
+            </Grid>
+          )}
         </Grid>
       </form>
-
     </ContainerBar>
   )
 }

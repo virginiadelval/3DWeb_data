@@ -1,7 +1,14 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit'
 
-import { getBuildable, getPlusvalia } from 'utils/apiConfig'
+import {
+  getBuildable,
+  getEnrase,
+  getPlusvalia,
+  getPdfLink
+} from 'utils/apiConfig'
 import { actions as alertsActions } from 'state/ducks/alerts'
+import { getAffectationsTableNoAsync } from 'utils/configQueries'
+import { UNIDAD_EDIFICABILIDAD } from 'utils/unidadesEdificabilidad'
 
 const areaChanged = createAsyncThunk(
   'buildable/areaChanged',
@@ -19,32 +26,51 @@ const areaChanged = createAsyncThunk(
     const url = getPlusvalia(smp, area)
     const data = await fetch(url)
       .then((response) => response.json())
-      .then(({
-        plusvalia_em: em,
-        plusvalia_pl: pl,
-        plusvalia_sl: sl
-      }) => ({
-        plusvalia_em: (em === 0 ? 0 : em.toLocaleString('es-AR')),
-        plusvalia_pl: (pl === 0 ? 0 : pl.toLocaleString('es-AR')),
-        plusvalia_sl: (sl === 0 ? 0 : sl.toLocaleString('es-AR'))
-      }))
+      .then(
+        ({
+          plusvalia_em: em,
+          plusvalia_pl: pl,
+          plusvalia_sl: sl,
+          alicuota: al,
+          incidencia_uva: uva,
+          distrito_cpu: cpu
+        }) => ({
+          plusvalia_em: em === 0 ? 0 : em.toLocaleString('es-AR'),
+          plusvalia_pl: pl === 0 ? 0 : pl.toLocaleString('es-AR'),
+          plusvalia_sl: sl === 0 ? 0 : sl.toLocaleString('es-AR'),
+          alicuota: al === 0 ? 0 : al.toLocaleString('es-AR'),
+          incidencia_uva: uva === 0 ? 0 : uva.toLocaleString('es-AR'),
+          distrito_cpu: cpu
+        })
+      )
     return {
       plusvalia: data
     }
   }
 )
 
-const clickOnParcel = createAsyncThunk(
-  'buildable/clickOnParcel',
-  async (smp, { dispatch }) => {
-    dispatch(alertsActions.clear())
-    if (smp.length === undefined) {
-      return { smp: 'Invalido' }
-    }
-    const url = getBuildable(smp)
-    const data = await fetch(url)
-      .then((response) => response.json())
-      .then(({
+const getAffectations = (afectaciones) => {
+  const afectacionesFiltrado = Object.entries(afectaciones)
+    .filter(([, value]) => value !== 0)
+    .map(([key]) => key)
+
+  const affectationsTable = getAffectationsTableNoAsync()
+  const data = afectacionesFiltrado
+    .map((id) => affectationsTable.find((at) => at.id === id))
+    .filter((d) => d !== undefined)
+  return data
+}
+
+const getDataBuild = (url) =>
+  fetch(url)
+    .then((response) => response.json())
+    .then((data) => {
+      const afectaciones = getAffectations(data.afectaciones)
+
+      return { ...data, afectaciones }
+    })
+    .then(
+      ({
         altura_max: alturas,
         fot: {
           fot_medianera: medianera,
@@ -57,7 +83,10 @@ const clickOnParcel = createAsyncThunk(
           // eslint-disable-next-line no-unused-vars
           plusvalia_pl: pl,
           // eslint-disable-next-line no-unused-vars
-          plusvalia_sl: sl
+          plusvalia_sl: sl,
+          alicuota: al,
+          incidencia_uva: uva,
+          distrito_cpu: cpu
         },
         sup_max_edificable: supMax,
         sup_edificable_planta: supPlanta,
@@ -66,7 +95,7 @@ const clickOnParcel = createAsyncThunk(
         const alturasAux = alturas
           .filter((altura) => altura > 0)
           .map((altura) => altura.toLocaleString('es-AR'))
-        return ({
+        return {
           altura_max: alturasAux.length === 0 ? [0] : alturasAux,
           fot: {
             fot_medianera: medianera.toLocaleString('es-AR'),
@@ -77,78 +106,136 @@ const clickOnParcel = createAsyncThunk(
           plusvalia: {
             plusvalia_em: 0,
             plusvalia_pl: 0,
-            plusvalia_sl: 0
+            plusvalia_sl: 0,
+            alicuota: al === 0 ? 0 : al.toLocaleString('es-AR'),
+            incidencia_uva: uva === 0 ? 0 : uva,
+            distrito_cpu: cpu
           },
           sup_max_edificable: supMax.toLocaleString('es-AR'),
           sup_edificable_planta: supPlanta.toLocaleString('es-AR'),
           // Por el Ticket 2863 se ignora supPlanta y se deja en cero
           // sup_edificable_planta: 0,
           ...others
-        })
-      })
+        }
+      }
+    )
 
-    const esp = data
-      ?.distrito_especial?.filter((distrito) => distrito.distrito_especifico.length > 0)
-    // Condiciones de alertas
-    const deCount = esp.length ?? 0
-    const udCount = data
-      ?.unidad_edificabilidad?.filter((valor) => valor > 0).length ?? 0
-    if (deCount + udCount > 1) {
-      dispatch(alertsActions.addId('unidad_edificabilidad'))
-    } else {
-      const uniEdif1 = data?.unidad_edificabilidad[0] ?? 0
-      switch (uniEdif1) {
-        case 38:
-          dispatch(alertsActions.addId('coredor_alto'))
+const clickOnParcel = createAsyncThunk(
+  'buildable/clickOnParcel',
+  async (smp, { dispatch }) => {
+    dispatch(alertsActions.clear())
+    if (smp.length === undefined) {
+      return { smp: 'Invalido' }
+    }
+    const [dataBuild, dataEnrase] = await Promise.all([
+      getDataBuild(getBuildable(smp)),
+      fetch(getEnrase(smp)).then((response) => response.json())
+    ])
+
+    const data = {
+      ...dataBuild,
+      ...dataEnrase
+    }
+
+    const esp = data?.distrito_especial?.filter(
+      (distrito) => distrito.distrito_especifico.length > 0
+    )
+
+    const uniEdif = data?.unidad_edificabilidad || []
+
+    uniEdif.forEach((UE) => {
+      switch (UE) {
+        case UNIDAD_EDIFICABILIDAD.CORREDOR_ALTO:
+          dispatch(alertsActions.addId('corredor_alto'))
           break
-        case 31.2:
-          dispatch(alertsActions.addId('coredor_medios'))
+        case UNIDAD_EDIFICABILIDAD.CORREDOR_MEDIO:
+          dispatch(alertsActions.addId('corredor_medios'))
           break
-        case 22.8:
+        case UNIDAD_EDIFICABILIDAD.USAA:
           dispatch(alertsActions.addId('usaa'))
           break
-        case 17.2:
+        case UNIDAD_EDIFICABILIDAD.USAM:
           dispatch(alertsActions.addId('usam'))
           break
-        case 11.6:
+        case UNIDAD_EDIFICABILIDAD.USAB2:
           dispatch(alertsActions.addId('usab2'))
           break
-        case 9:
+        case UNIDAD_EDIFICABILIDAD.USAB1:
           dispatch(alertsActions.addId('usab1'))
+          break
+        case UNIDAD_EDIFICABILIDAD.USAB0:
+          dispatch(alertsActions.addId('usab0'))
           break
         default:
       }
-      const agrupado = esp[0]?.distrito_agrupado?.toUpperCase() ?? ''
-      if (agrupado !== '') {
-        const id = `especial_${agrupado.replace(/[\/|\s]/, '_')}`
-        dispatch(alertsActions.addId(id))
-        const titleSuffix = esp[0]?.distrito_especifico?.trim()
-        dispatch(alertsActions.addExtraData({ id, titleSuffix }))
-      }
+    })
+
+    const agrupado = esp[0]?.distrito_agrupado?.toUpperCase() ?? ''
+    if (agrupado !== '') {
+      const id = `especial_${agrupado.replace(/[/|\s]/, '_')}`
+      dispatch(alertsActions.addId(id))
+      const titleSuffix = esp[0]?.distrito_especifico?.trim()
+      dispatch(alertsActions.addExtraData({ id, titleSuffix }))
     }
-    const afectacionesCount = Object.values(data?.afectaciones ?? {})
-      .filter((valor) => valor > 0).length ?? 0
+    const afectacionesCount =
+      Object.values(data?.afectaciones ?? {}).filter((valor) => valor > 0)
+        .length ?? 0
     if (afectacionesCount > 0) {
       dispatch(alertsActions.addId('afectaciones'))
     }
-    if (data?.rivolta > 0) {
-      dispatch(alertsActions.addId(
-        data?.tipica?.length
-          // TODO: los id de rivolta deberían estar al revez
-          // Dado que se hizo un tag en el repositorio con la configuración mal hecha,
-          // se modificó la alerta en el appConfig
-          ? 'rivolta_atipica'
-          : 'rivolta'
-      ))
+    if (data?.rivolta > 0 && data?.tipica?.length) {
+      dispatch(alertsActions.addId('rivolta'))
+    }
+    if (
+      data?.tipica?.toUpperCase() !== 'T' &&
+      !data?.manzanas_atipicas?.disposicio?.length
+    ) {
+      const id = 'manzana_atipica'
+      dispatch(alertsActions.addId(id))
+    }
+    if (
+      data?.tipica?.toUpperCase() !== 'T' &&
+      data?.manzanas_atipicas?.disposicio?.length
+    ) {
+      const id = 'manzana_atipica_disposicion'
+      dispatch(alertsActions.addId(id))
+      dispatch(
+        alertsActions.addExtraData({
+          id,
+          value: data.manzanas_atipicas.disposicio,
+          value2: data.manzanas_atipicas.pdf
+            ? getPdfLink(data.manzanas_atipicas.pdf)
+            : 'DISABLED'
+        })
+      )
     }
     if (data.parcelas_linderas?.aph_linderas) {
       dispatch(alertsActions.addId('adyacente_catalogado'))
     }
-    if (['cautelar', 'integral', 'especial', 'estructural'].includes(data.catalogacion?.proteccion?.toLowerCase())) {
-      dispatch(alertsActions.addId('catalogado'))
+    if (
+      ['cautelar', 'integral', 'especial', 'estructural'].includes(
+        data.catalogacion?.proteccion?.toLowerCase()
+      )
+    ) {
+      const id = 'catalogado'
+      dispatch(alertsActions.addId(id))
+      const titleSuffix = data.catalogacion.proteccion
+      dispatch(alertsActions.addExtraData({ id, titleSuffix }))
     }
     if ((data?.fot?.total ?? 0) === 0) {
       dispatch(alertsActions.addId('plusvalía_no_calculable'))
+    }
+    if (data?.enrase) {
+      dispatch(alertsActions.addId('enrase'))
+    }
+    if (data?.subzona?.length) {
+      const id = 'subzona'
+      dispatch(alertsActions.addId(id))
+      dispatch(alertsActions.addExtraData({ id, value: data.subzona }))
+    }
+    if (data?.irregular) {
+      const id = 'irregular'
+      dispatch(alertsActions.addId(id))
     }
 
     return data

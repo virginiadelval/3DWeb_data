@@ -1,6 +1,6 @@
-import { makeStyles } from '@material-ui/core/styles'
+import theme from 'theme'
 
-export default makeStyles((theme) => ({
+const styles = {
   box: {
     border: '1px solid #D9D9D9',
     borderLeftWidth: 3,
@@ -52,4 +52,6 @@ export default makeStyles((theme) => ({
     alignItems: 'center',
     justifyContent: 'center'
   }
-}))
+}
+
+export default styles

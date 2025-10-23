@@ -2,54 +2,41 @@ import React from 'react'
 
 import PropTypes from 'prop-types'
 
-import { Box } from '@material-ui/core'
-import DirectionsIcon from '@material-ui/icons/Directions'
+import { Box } from '@mui/material'
 
-import useStyles from './styles'
+import styles from './styles'
 
-const FeatureInfo = ({ contenido, direccionNormalizada }) => {
-  const classes = useStyles()
+const FeatureInfo = ({ contenido }) => {
   const titulo = contenido.filter((p) => p.nombreId === 'nombre')[0].valor
-  const comoLlegoURL = `https://mapa.buenosaires.gob.ar/comollego/?lat=-34.620866&lng=-58.462780&zl=15&modo=transporte&hasta=${direccionNormalizada}`
-
   return (
-
-    <Box className={classes.featureInfo}>
+    <Box sx={styles.featureInfo}>
       <h4>{titulo}</h4>
-      <Box className={classes.markerProperties}>
-        {
-          contenido.map((p) => ((p.nombreId !== 'nombre' && p.nombreId[0] !== '_' && p.valor[0] !== '<' && p.valor !== '')
-            ? (
-              <Box className={classes.markerProperty} key={p.nombreId}>
-                <Box component="span" className={classes.markerPropertiesKey}>
-                  {p.nombre}
-                  :
-                  {' '}
-                </Box>
-                <Box component="span" className={classes.ultimaActualizacion}>{p.valor}</Box>
-
+      <Box sx={styles.markerProperties}>
+        {contenido.map((p) =>
+          p.nombreId !== 'nombre' &&
+          p.nombreId[0] !== '_' &&
+          p.valor[0] !== '<' &&
+          p.valor !== '' ? (
+            <Box sx={styles.markerProperty} key={p.nombreId}>
+              <Box component="span" sx={styles.markerPropertiesKey}>
+                {p.nombre}:{' '}
               </Box>
-            )
-            : null))
-        }
-      </Box>
-      <Box className={classes.goContainer}>
-        <a target="_blank" rel="noopener noreferrer" href={comoLlegoURL} style={{ color: '#FFCE38' }}>
-          <DirectionsIcon />
-        </a>
+              <Box component="span" sx={styles.ultimaActualizacion}>
+                {p.valor}
+              </Box>
+            </Box>
+          ) : null
+        )}
       </Box>
     </Box>
-
   )
 }
 
 FeatureInfo.propTypes = {
-  contenido: PropTypes.arrayOf(PropTypes.object),
-  direccionNormalizada: PropTypes.string
+  contenido: PropTypes.arrayOf(PropTypes.object)
 }
 
 FeatureInfo.defaultProps = {
-  contenido: [],
-  direccionNormalizada: ''
+  contenido: []
 }
 export default FeatureInfo

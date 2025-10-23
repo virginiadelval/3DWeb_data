@@ -2,48 +2,71 @@ import React from 'react'
 
 import PropTypes from 'prop-types'
 
-import {
-  SvgIcon, Typography, CardActionArea
-} from '@material-ui/core'
+import { SvgIcon, Typography, CardActionArea } from '@mui/material'
 
 import { useDispatch, useSelector } from 'react-redux'
 import { actions } from 'state/ducks/categories'
 import { actions as actionsTour } from 'state/ducks/tour'
 import { actions as alertsActions } from 'state/ducks/alerts'
+import { sectionsAnalytics } from 'utils/reactga4'
 
-import useStyles from './styles'
+import styles from './styles'
 
-const Icon = ({ className, path, isSelected }) => (
-  <SvgIcon className={className} component="div" color={isSelected ? 'primary' : 'disabled'}>
-    { path }
+const Icon = ({ path, isSelected }) => (
+  <SvgIcon
+    sx={{
+      ...styles['icon'],
+      color: isSelected && '#fed304',
+      width: '100%!important'
+    }}
+    component="div"
+    color={isSelected ? 'primary' : 'disabled'}
+  >
+    {path}
   </SvgIcon>
 )
 
-const Category = ({ id, path, title }) => {
-  const sectionName = useSelector((state) => (state.categories.sectionId.length === 0
-    ? null
-    : state.categories.sectionId[0]))
+const Category = ({ id, path, title, url }) => {
+  const sectionName = useSelector((state) =>
+    state.categories.sectionId.length === 0
+      ? null
+      : state.categories.sectionId[0]
+  )
 
   const dispatch = useDispatch()
-
-  const classes = useStyles()
 
   const isSelected = sectionName === id
 
   return (
     <CardActionArea
+      data-tour={id}
       onClick={() => {
         dispatch(alertsActions.clear())
         if (id === 'Tutorial') {
           dispatch(actionsTour.isVisibleTour(true))
-        } else {
-          dispatch(actions.categorySelected(id))
+          return
         }
+        if (url) {
+          window.open(url, '_blank')
+          return
+        }
+        dispatch(actions.categorySelected(id))
+        sectionsAnalytics(title)
       }}
-      className={classes.option}
+      sx={styles.option}
     >
-      <Icon className={classes.icon} path={path} isSelected={isSelected} />
-      <Typography variant="caption">{title}</Typography>
+      <Icon path={path} isSelected={isSelected} />
+      <Typography
+        variant="caption"
+        sx={{
+          letterSpacing: 0,
+          fontSize: '11.5px',
+          lineHeight: '17px',
+          fontWeight: '400'
+        }}
+      >
+        {title}
+      </Typography>
     </CardActionArea>
   )
 }
@@ -51,11 +74,11 @@ const Category = ({ id, path, title }) => {
 Category.propTypes = {
   id: PropTypes.string.isRequired,
   path: PropTypes.objectOf(PropTypes.any).isRequired,
+  url: PropTypes.string.isRequired,
   title: PropTypes.string.isRequired
 }
 
 Icon.propTypes = {
-  className: PropTypes.string.isRequired,
   path: PropTypes.objectOf(PropTypes.any).isRequired,
   isSelected: PropTypes.bool.isRequired
 }

@@ -1,17 +1,15 @@
-import { makeStyles } from '@material-ui/core/styles'
-
-export default makeStyles(() => ({
+const styles = {
   container: {
     height: '10%',
     minHeight: '100vh',
-    margin: 0,
+    margin: '0px',
     maxWidth: '100%',
-    padding: 0,
-    lineHeight: 0
+    padding: '0px',
+    lineHeight: 1.5
   },
   topMenu: {
     position: 'fixed',
-    right: '23px',
+    right: '50px',
     top: '10px',
     zIindex: 998,
     display: 'inline-flex'
@@ -21,7 +19,9 @@ export default makeStyles(() => ({
     right: '23px',
     bottom: '10px',
     zIndex: 998,
-    display: 'inline-flex'
+    display: 'inline-flex',
+    flexDirection: 'row-reverse',
+    backgroundColor: 'rgba(255, 255, 255, 0.3)'
   },
   minimapLayer: {
     cursor: 'pointer',
@@ -33,21 +33,48 @@ export default makeStyles(() => ({
     backgroundSize: 'cover',
     textAlign: 'center',
     boxSizing: 'border-box',
-    boxShadow: '0 0 5px #000'
+    boxShadow: '2 2 5px #000',
+    border: '2px solid #fff',
+    margin: '5px'
   },
   minimapTitleContainer: {
     display: 'table',
     width: '100%',
-    background: 'rgba(255,255,255,0.6)',
-    height: '25%',
-    padding: 0,
-    border: 0,
+    padding: '0px',
+    border: '0px',
     position: 'absolute',
-    bottom: '5%',
-    transition: 'bottom .35s ease'
+    top: 'calc(50% - 8px)',
+    transition: 'bottom .35s ease',
+    textShadow:
+      '2px 0 #333, -2px 0 #333, 0 2px #333, 0 -2px #333, 1px 1px #333, -1px -1px #333, 1px -1px #333, -1px 1px #333'
   },
   minimapTitle: {
     display: 'table-cell',
     verticalAlign: 'middle'
+  },
+  historyMenu: {
+    display: 'flex',
+    flexDirection: 'column-reverse',
+    color: 'white',
+    position: 'absolute',
+    left: '5px'
+  },
+  historyTitle: {
+    border: '1px solid white',
+    width: '80px',
+    height: '30px',
+    marginBottom: '5px',
+    fontWeight: 'bold',
+    fontSize: '14px',
+    display: 'flex',
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'rgba(0, 0, 0, 0.7)',
+    '&:hover': {
+      border: '2px solid white',
+      backgroundColor: 'black',
+      cursor: 'pointer'
+    }
   }
-}))
+}
+export default styles

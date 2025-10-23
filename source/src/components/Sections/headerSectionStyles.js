@@ -1,6 +1,6 @@
-import { makeStyles } from '@material-ui/core/styles'
+import theme from 'theme'
 
-export default makeStyles((theme) => ({
+const styles = {
   container: {
     minHeight: theme.spacing(5),
     marginBottom: theme.spacing(3)
@@ -20,11 +20,21 @@ export default makeStyles((theme) => ({
     marginTop: '5px'
   },
   info: {
+    marginLeft: '5px',
+    marginTop: '5px',
     height: '17px',
     width: '17px'
   },
   sectionTitle: {
     float: 'left',
     display: 'inline'
+  },
+  sectionTitleTypography: {
+    fontSize: '17.5px'
+  },
+  informationTitle: {
+    fontSize: '21px'
   }
-}))
+}
+
+export default styles

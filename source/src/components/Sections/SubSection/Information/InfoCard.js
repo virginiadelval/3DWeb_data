@@ -1,32 +1,24 @@
 import React from 'react'
 
-import { CardActionArea, Typography } from '@material-ui/core'
+import { CardActionArea, Typography } from '@mui/material'
 
 import { actions } from 'state/ducks/categories'
 import { useDispatch } from 'react-redux'
-import useFontsStyles from 'theme/fontsDecorators'
+import decorators from 'theme/fontsDecorators'
 
 import PropTypes from 'prop-types'
 import styles from './styles'
 
-const InfoCard = ({
-  id, title, description, color
-}) => {
-  const classes = styles()
-  const decorators = useFontsStyles()
+const InfoCard = ({ id, title, color }) => {
   const dispatch = useDispatch()
 
   return (
     <CardActionArea
-      style={{ borderColor: color }}
-      className={classes.card}
+      sx={{ ...styles['card'], borderColor: color }}
       onClick={() => dispatch(actions.sectionSelected(id))}
     >
-      <Typography variant="h5" className={decorators.bold}>
+      <Typography variant="h5" sx={[decorators.bold, { fontSize: '21px' }]}>
         {title}
-      </Typography>
-      <Typography variant="body1" className={decorators.openSans}>
-        {description}
       </Typography>
     </CardActionArea>
   )
@@ -35,7 +27,6 @@ const InfoCard = ({
 InfoCard.propTypes = {
   id: PropTypes.string.isRequired,
   title: PropTypes.string.isRequired,
-  description: PropTypes.string.isRequired,
   color: PropTypes.string.isRequired
 }
 

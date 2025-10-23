@@ -1,6 +1,6 @@
-import { makeStyles } from '@material-ui/core/styles'
+import theme from 'theme'
 
-export default makeStyles((theme) => ({
+const styles = {
   container: {
     height: '100%'
   },
@@ -19,4 +19,5 @@ export default makeStyles((theme) => ({
   captcha: {
     marginBottom: theme.spacing(1.5)
   }
-}))
+}
+export default styles

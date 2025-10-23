@@ -1,6 +1,6 @@
 import React from 'react'
 
-import { Box, Paper } from '@material-ui/core'
+import { Box, Paper } from '@mui/material'
 import Scrollbar from 'react-smooth-scrollbar'
 
 import { getCategoryTitle, getSectionInfo } from 'utils/configQueries'
@@ -11,24 +11,30 @@ import Alerts from 'components/Alerts'
 import HeaderSection from 'components/Sections/HeaderSection'
 
 import PropTypes from 'prop-types'
-import useStyles from './ContainerBarStyles'
+import styles from './ContainerBarStyles'
 
 const ContainerBar = ({ children, type }) => {
-  const classes = useStyles()
-
   const sectionId = useSelector((state) => state.categories.sectionId)
   const categoryTitle = getCategoryTitle(sectionId[0])
 
   const lastIndex = sectionId.length - 1
-  const { title, info } = lastIndex > 0
-    ? getSectionInfo(sectionId[lastIndex]) : { title: null, info: null }
+  const selectedOption = sectionId[0].toLowerCase()
 
-  const maxHeight = sectionId.length > 1
-    ? '80vh' : '85vh'
+  const { title, info } =
+    lastIndex > 0
+      ? getSectionInfo(selectedOption, sectionId[lastIndex])
+      : { title: null, info: null }
+
+  const maxHeight = sectionId.length > 1 ? '80vh' : '85vh'
 
   return (
-    <Box className={`${classes[type]} ${classes.container} ${classes.responsive}`}>
-      <Paper elevation={2} className={classes.padding}>
+    <Box
+      sx={{
+        ...styles['container'],
+        ...styles[type]
+      }}
+    >
+      <Paper elevation={2} sx={styles.padding}>
         <HeaderSection
           categoryTitle={categoryTitle}
           sectionTitle={title}
@@ -37,7 +43,7 @@ const ContainerBar = ({ children, type }) => {
       </Paper>
 
       <Scrollbar>
-        <Box className={classes.padding} style={{ maxHeight }}>
+        <Box sx={styles.padding} style={{ maxHeight }}>
           <Alerts />
           {children}
         </Box>

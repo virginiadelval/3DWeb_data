@@ -1,22 +1,89 @@
-import { createMuiTheme } from '@material-ui/core/styles'
-import { red } from '@material-ui/core/colors'
-import { white } from 'material-ui/styles/colors'
+import { createTheme } from '@mui/material/styles'
+import { red } from '@mui/material/colors'
 
 const spacing = 8
-const theme = createMuiTheme({
+const theme = createTheme({
+  typography: {
+    allVariants: { fontFamily: ['"Nunito"', 'Open Sans'].join(',') },
+    caption: {
+      letterSpacing: 0,
+      fontSize: '11.5px',
+      lineHeight: '17px'
+    },
+
+    h5: {
+      fontSize: '1.5rem'
+    },
+    subtitle1: {
+      fontSize: '14px'
+    },
+    subtitle2: {
+      fontSize: '12px'
+    }
+  },
+  palette: {
+    text: {
+      primary: '#707070',
+      secondary: '#D9D9D9',
+      Info: '#00f'
+    },
+    action: {
+      active: '#707070',
+      hoverOpacity: 0.1
+    },
+    // primary: {
+    //   main: '#EECE2F!important'
+    // },
+    secondary: {
+      main: '#F3F3F3'
+    },
+    error: {
+      main: red.A400
+    },
+    background: {
+      default: '#fff'
+    }
+  },
+  components: {
+    MuiSvgIcon: {
+      styleOverrides: {
+        root: {
+          colorPrimary: '#fed304'
+        }
+      }
+    },
+    MuiFormLabel: {
+      styleOverrides: {
+        root: {
+          color: '#707070'
+        }
+      }
+    },
+    MuiMobileStepper: {
+      styleOverrides: {
+        dotActive: {
+          backgroundColor: '#FFD306'
+        }
+      }
+    },
+    MuiAutocomplete: {
+      styleOverrides: {
+        popper: {
+          '&[data-popper-placement="top"]': {
+            marginBottom: '10px !important'
+          }
+        }
+      }
+    }
+  },
   overrides: {
     spacing,
     MuiCssBaseline: {
       '@global': {
         html: {
           fontSize: 14,
-          backgroundColor: white[500]
+          backgroundColor: '#ffffff'
         }
-      }
-    },
-    MuiSvgIcon: {
-      root: {
-        colorPrimary: '#fed304'
       }
     },
     MuiAccordion: {
@@ -38,50 +105,6 @@ const theme = createMuiTheme({
       root: {
         padding: 0
       }
-    },
-    MuiFormLabel: {
-      root: {
-        color: '#707070'
-      }
-    }
-  },
-  typography: {
-    fontFamily: [
-      'Nunito',
-      'Open Sans'
-    ].join(','),
-    caption: {
-      letterSpacing: 0,
-      fontSize: '11.5px',
-      lineHeight: '17px'
-    },
-    h5: {
-      fontSize: '1.5rem'
-    },
-    body1: {
-    }
-  },
-  palette: {
-    text: {
-      primary: '#707070',
-      secondary: '#D9D9D9',
-      Info: '#00f'
-    },
-    action: {
-      active: '#707070',
-      hoverOpacity: 0.1
-    },
-    primary: {
-      main: '#EECE2F!important'
-    },
-    secondary: {
-      main: '#F3F3F3'
-    },
-    error: {
-      main: red.A400
-    },
-    background: {
-      default: '#fff'
     }
   }
 })

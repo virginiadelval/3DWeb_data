@@ -1,16 +1,13 @@
 import React from 'react'
 
-import {
-  Paper, Typography
-} from '@material-ui/core'
+import { Paper, Typography } from '@mui/material'
 
-import useStyles from './styles'
+import styles from './styles'
 
 const LayerGroup = () => {
-  const classes = useStyles()
   return (
-    <Paper className={classes.paper}>
-      <Typography variant="body1" className={classes.body1}>
+    <Paper sx={styles.paper}>
+      <Typography variant="body1" sx={styles.body1}>
         Seleccione una parcela
       </Typography>
     </Paper>

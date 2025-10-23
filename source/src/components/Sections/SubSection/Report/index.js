@@ -3,57 +3,56 @@ import React, { useEffect } from 'react'
 import PropTypes from 'prop-types'
 
 import {
-  Typography, IconButton, CircularProgress, Card
-} from '@material-ui/core'
-import CloudDownloadOutlinedIcon from '@material-ui/icons/CloudDownloadOutlined'
-import Error from '@material-ui/icons/Error'
+  Typography,
+  IconButton,
+  CircularProgress,
+  Card,
+  Tooltip
+} from '@mui/material'
+import { Warning } from '@mui/icons-material'
 
 import ContainerBar from 'components/Sections/ContainerBar'
 import { actions } from 'state/ducks/reports'
 import { useDispatch, useSelector } from 'react-redux'
+import { CADAnalytics } from 'utils/reactga4'
 
-import useStyles from './styles'
+import styles from './styles'
 
-const Item = ({
-  smp, address, state, onClick
-}) => {
-  const classes = useStyles()
+const Item = ({ smp, address, cadLink, state, onClick }) => {
   return (
-    <Card className={classes.card}>
-      <Typography>
-        SMP:
-        {' '}
-        {smp}
-        :
-      </Typography>
-      {
-        state === 'ready' && (
-          <IconButton
-            onClick={onClick}
-            className={classes.icon}
-          >
-            <CloudDownloadOutlinedIcon />
-          </IconButton>
-        )
-      }
-      {
-        state === 'loading' && (
-          <CircularProgress
-            className={classes.icon}
-            size={20}
+    <Card sx={styles.card}>
+      <Typography variant="subtitle1">SMP: {smp}:</Typography>
+      <Tooltip title="descarga Archivo CAD">
+        <IconButton
+          onClick={() => {
+            CADAnalytics('CAD_download')
+            window.open(cadLink, '_blank')
+          }}
+          sx={styles.icon}
+        >
+          <img
+            src="https://epok.buenosaires.gob.ar/media/repok/uploads/mapainteractivoba/Archivo_CAD__.png"
+            width="24px"
           />
-        )
-      }
-      {
-        state === 'error' && (
-          <Error />
-        )
-      }
-      <Typography>
-        Dirección:
-        {' '}
-        {address}
-      </Typography>
+        </IconButton>
+      </Tooltip>
+      {state === 'ready' && (
+        <Tooltip title="descarga Certificado Urbanístico">
+          <IconButton onClick={() => onClick('PDF')} sx={styles.icon}>
+            <img
+              src="https://epok.buenosaires.gob.ar/media/repok/uploads/mapainteractivoba/Certificado_Urbanistico_.png"
+              width="24px"
+            />
+          </IconButton>
+        </Tooltip>
+      )}
+      {state === 'loading' && <CircularProgress sx={styles.icon} size={20} />}
+      {state === 'error' && (
+        <Tooltip title="No disponible actualmente">
+          <Warning sx={styles.icon} size={20} />
+        </Tooltip>
+      )}
+      <Typography variant="subtitle1">Dirección: {address}</Typography>
     </Card>
   )
 }
@@ -62,29 +61,30 @@ const Report = () => {
   const smp = useSelector((state) => state.parcel.smp)
   const reports = useSelector((state) => state.reports)
 
-  const handleOnClick = (key) => dispatch(actions.download(key))
+  const handleOnClick = (type, key) => {
+    if (type === 'pdf') {
+      dispatch(actions.download(key))
+    }
+  }
+
   useEffect(() => {
     if (smp !== null) {
       dispatch(actions.getData(smp))
     }
   }, [dispatch, smp])
+
   return (
-    <ContainerBar
-      type="list"
-    >
-      {
-        Object.entries(reports).map(
-          ([key, { state, address }]) => (
-            <Item
-              key={key}
-              smp={key}
-              state={state}
-              address={address}
-              onClick={() => handleOnClick(key)}
-            />
-          )
-        )
-      }
+    <ContainerBar type="list">
+      {Object.entries(reports).map(([key, { state, address, cadLink }]) => (
+        <Item
+          key={key}
+          smp={key}
+          state={state}
+          address={address}
+          cadLink={cadLink}
+          onClick={(type) => handleOnClick(type, key)}
+        />
+      ))}
     </ContainerBar>
   )
 }

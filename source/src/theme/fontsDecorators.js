@@ -1,6 +1,6 @@
-import { makeStyles } from '@material-ui/core/styles'
+import theme from 'theme'
 
-export default makeStyles(({ spacing }) => ({
+const decorators = {
   bold: {
     fontWeight: 'bold'
   },
@@ -8,21 +8,26 @@ export default makeStyles(({ spacing }) => ({
     fontFamily: 'Open Sans'
   },
   marginTop_md: {
-    marginTop: spacing(1)
+    marginTop: theme.spacing(1)
   },
   marginTop_xl: {
-    marginTop: spacing(3)
+    marginTop: theme.spacing(3)
   },
   marginBottom_xl: {
-    marginBottom: spacing(3.35) // 3.35 -  27px
+    marginBottom: theme.spacing(3.35) // 3.35 -  27px
   },
   marginBottom_ml: {
-    marginBottom: spacing(2) // 2 -  16px
+    marginBottom: theme.spacing(2) // 2 -  16px
   },
   marginRight_md: {
-    marginRight: spacing(3) // 3 -  24px
+    marginRight: theme.spacing(3) // 3 -  24px
   },
   grey333: {
     color: '#333333'
+  },
+  white: {
+    color: '#fff'
   }
-}))
+}
+
+export default decorators

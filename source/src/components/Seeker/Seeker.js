@@ -1,81 +1,106 @@
-import React, { useState } from 'react'
+import React, { useState, useCallback } from 'react'
 
-import { Autocompleter, Suggester } from '@usig-gcba/autocompleter'
 import {
-  Box, Avatar, IconButton, InputBase, ListItemAvatar, ListItemText, ListItem, Paper
-} from '@material-ui/core/'
-import PlaceIcon from '@material-ui/icons/Place'
-import SearchIcon from '@material-ui/icons/Search'
-import StarIcon from '@material-ui/icons/Star'
+  Box,
+  Avatar,
+  InputBase,
+  ListItemAvatar,
+  ListItemText,
+  ListItem,
+  ListItemButton,
+  Paper
+} from '@mui/material'
+import PlaceIcon from '@mui/icons-material/Place'
+import SearchIcon from '@mui/icons-material/Search'
+import StarIcon from '@mui/icons-material/Star'
 
 import Downshift from 'downshift'
 
 import PropTypes from 'prop-types'
 
-import useStyles from './styles'
+import styles from './styles'
+import { Autocompleter as NewAutocompleter } from 'autocompleter-caba/dist/src'
+import useDebounce from '../../hooks/useDebounce'
 
 const Seeker = ({ onSelectItem }) => {
-  const classes = useStyles()
-
-  const [inputValue, setInputValue] = useState('')
-  const [selectedSuggestion, setSelectedSuggestion] = useState(null)
   const [suggestions, setSuggestions] = useState([])
+  const { debounce } = useDebounce()
 
-  // Opciones de config del autocomplete
-  const options = { maxSuggestions: 10, debug: false }
+  const newAutocompleter = new NewAutocompleter()
 
-  // Callbacks del autocomplete
-  const suggestionsCallback = (s) => {
-    setSuggestions(s)
+  const handleNewAutocompleter = async (event) => {
+    const text = event.target.value
+    if (!text) return
+    try {
+      const suggestions = await newAutocompleter.getSuggestions(text)
+
+      const filteredSuggestions = suggestions.filter(
+        (suggestion) => suggestion.error !== true
+      )
+      if (filteredSuggestions.length === 0) {
+        setSuggestions([
+          {
+            type: 'tipoalerta',
+            title: 'No se hallaron resultados coincidentes'
+          }
+        ])
+        return
+      }
+      setSuggestions(filteredSuggestions)
+    } catch (error) {}
   }
 
-  const completeSuggestionsCallback = (sug) => {
-    if (sug.length === 0) {
-      setSuggestions([{
-        data: {
-          tipo: 'tipoalerta'
-        },
-        title: 'No se hallaron resultados coincidentes'
-      }])
+  const handleSearchDirection = async (suggestionText, onSelectItem, type) => {
+    try {
+      const suggestion = await newAutocompleter.getSearch(suggestionText)
+
+      if (suggestion?.error) {
+        setSuggestions([
+          {
+            type: 'tipoalerta',
+            title: suggestion.error
+          }
+        ])
+        throw suggestion.error
+      }
+
+      if (type === 'address') {
+        setSuggestions([])
+        onSelectItem({
+          data: {
+            ...suggestion.data,
+            coordenadas: {
+              x: suggestion.data.coordenada_x,
+              y: suggestion.data.coordenada_y
+            }
+          }
+        })
+      }
+
+      if (type === 'place') {
+        setSuggestions([])
+        onSelectItem(suggestion)
+      }
+    } catch (error) {
+      console.log(error, 'error, handleSearchDirection')
     }
   }
 
-  const errorCallback = (/* error */) => {
-    if (suggestions.length === 0) {
-      // TODO: Añadir error
-      // setErrorSugerencias(error);
-    }
-  }
-
-  const autocompleter = new Autocompleter(
-    {
-      onCompleteSuggestions: completeSuggestionsCallback,
-      onSuggestions: suggestionsCallback,
-      onError: errorCallback
-    },
-    options
+  const handleSearch = useCallback(
+    debounce((e) => handleNewAutocompleter(e), 750),
+    []
   )
 
-  const handleInputChange = (event) => {
-    const text = event.target.value
-    autocompleter.updateSuggestions(text)
-    setInputValue(text)
-  }
+  const handleSelectItem = (selectedSuggestion) => {
+    if (selectedSuggestion.type !== 'tipoalerta')
+      handleSearchDirection(
+        selectedSuggestion.value,
+        onSelectItem,
+        selectedSuggestion.type
+      )
 
-  const handleSelectItem = () => {
-    if (selectedSuggestion) {
-      setInputValue(`${selectedSuggestion.title} `)
+    if (selectedSuggestion.type === 'tipoalerta') {
       setSuggestions([])
-      if (selectedSuggestion.type === 'CALLE') {
-        setSuggestions([{
-          data: {
-            tipo: 'tipoalerta'
-          },
-          title: 'El origen indicado es una Calle, por lo tanto debe especificar la altura o bien un cruce para poder continuar con la búsqueda.'
-        }])
-      }
-      Promise.all(Suggester.getSuggestionPromises(selectedSuggestion))
-        .then(() => onSelectItem(selectedSuggestion))
     }
   }
 
@@ -83,17 +108,15 @@ const Seeker = ({ onSelectItem }) => {
     setSuggestions([])
   }
 
-  const renderInput = (inputProps) => {
-    const {
-      InputProps, classes: StyleClass, ref, ...other
-    } = inputProps
-
+  const renderInput = (props) => {
+    const { inputProps, styles: StyleClass, ...other } = props
+    const direcciónMasLarga = '125'
     return (
       <InputBase
-        className={StyleClass.input}
+        sx={StyleClass.input}
         inputProps={{
-          inputRef: ref,
-          ...InputProps
+          ...inputProps,
+          maxLength: direcciónMasLarga
         }}
         // eslint-disable-next-line react/jsx-props-no-spreading
         {...other}
@@ -102,50 +125,49 @@ const Seeker = ({ onSelectItem }) => {
   }
 
   const renderSuggestion = (suggestionProps) => {
-    const {
-      suggestion, index, itemProps, highlightedIndex
-    } = suggestionProps
+    const { suggestion, index, itemProps, highlightedIndex } = suggestionProps
 
-    const title = suggestion.alias || suggestion.title || suggestion.nombre
+    const title =
+      suggestion.alias ||
+      suggestion.title ||
+      suggestion.nombre ||
+      suggestion.value
     const subTitle = suggestion.subTitle
       ? suggestion.subTitle
       : suggestion.descripcion
     const Icono = suggestion.title ? PlaceIcon : StarIcon
 
     const isHighlighted = highlightedIndex === index
-    if (isHighlighted) {
-      setSelectedSuggestion(suggestion)
-    }
 
     return (
       <ListItem
         // eslint-disable-next-line react/jsx-props-no-spreading
         {...itemProps}
         key={index}
-        selected={isHighlighted}
         component="div"
-        className={classes.list}
+        sx={styles.list}
+        disablePadding
       >
-        <ListItemAvatar>
-          <Avatar>
-            <Icono fontSize="small" />
-          </Avatar>
-        </ListItemAvatar>
-        <ListItemText primary={title} secondary={subTitle} />
+        <ListItemButton selected={isHighlighted}>
+          <ListItemAvatar>
+            <Avatar>
+              <Icono fontSize="small" />
+            </Avatar>
+          </ListItemAvatar>
+          <ListItemText primary={title} secondary={subTitle} />
+        </ListItemButton>
       </ListItem>
     )
   }
-
-  autocompleter.addSuggester('Direcciones', { inputPause: 250 })
-  autocompleter.addSuggester('Lugares')
-  autocompleter.addSuggester('Catastro')
 
   return (
     <Box>
       <Downshift
         id="usig-autocomplete"
-        inputValue={inputValue}
         onSelect={handleSelectItem}
+        itemToString={(item) => item?.value || ''}
+        initialHighlightedIndex={0}
+        defaultHighlightedIndex={0}
       >
         {({
           getInputProps,
@@ -154,39 +176,40 @@ const Seeker = ({ onSelectItem }) => {
           highlightedIndex,
           selectedItem
         }) => {
-          const {
-            onBlur, onFocus, onChange, ...inputProps
-          } = getInputProps({
-            placeholder: 'Buscar'
+          const { onBlur, onFocus, ...inputProps } = getInputProps({
+            placeholder: 'Buscar',
+            onChange: (e) => {
+              handleSearch(e)
+            }
           })
 
           return (
             <div>
-              <Paper className={classes.root}>
+              <Paper sx={styles.root} data-tour="search-bar">
+                <SearchIcon sx={{ marginLeft: '5px' }} />
                 {renderInput({
-                  classes,
+                  styles,
                   inputProps,
-                  onChange: handleInputChange,
                   onBlur: handleInputBlur
                 })}
-                <IconButton aria-label="search">
-                  <SearchIcon />
-                </IconButton>
               </Paper>
 
               <Box
                 // eslint-disable-next-line react/jsx-props-no-spreading
                 {...getMenuProps()}
+                sx={styles.menuBox}
               >
                 {suggestions.length !== 0 ? (
-                  <Paper className={classes.paper} square>
-                    {suggestions.map((suggestion, index) => renderSuggestion({
-                      suggestion,
-                      index,
-                      itemProps: getItemProps({ item: suggestion.title }),
-                      highlightedIndex,
-                      selectedItem
-                    }))}
+                  <Paper sx={styles.paper} square>
+                    {suggestions.map((suggestion, index) => {
+                      return renderSuggestion({
+                        suggestion,
+                        index,
+                        itemProps: getItemProps({ item: suggestion }),
+                        highlightedIndex,
+                        selectedItem
+                      })
+                    })}
                   </Paper>
                 ) : null}
               </Box>

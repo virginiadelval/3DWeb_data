@@ -1,29 +1,35 @@
-import { makeStyles } from '@material-ui/core/styles'
-
-export default makeStyles((theme) => ({
+const styles = {
   root: {
     display: 'flex',
     alignItems: 'center',
-    width: '400px',
-    borderRadius: 1,
-    height: 40,
-    [theme.breakpoints.down('sm')]: {
-      width: '200px'
+    borderRadius: '1px',
+    height: '40px',
+    width: {
+      xs: '200px',
+      md: '400px'
     }
   },
   input: {
-    paddingLeft: 10,
+    paddingLeft: '5px',
     width: '100%'
   },
   iconButton: {
-    padding: 10
+    padding: '12px'
   },
   list: {
     fontSize: '0.6rem',
-    width: '400px',
-    display: 'flex',
-    [theme.breakpoints.down('sm')]: {
-      width: '200px'
+    width: '100%',
+    display: 'flex'
+  },
+  menuBox: {},
+  paper: {
+    maxHeight: '300px',
+    overflowY: 'auto',
+    width: {
+      xs: '200px',
+      md: '400px'
     }
   }
-}))
+}
+
+export default styles

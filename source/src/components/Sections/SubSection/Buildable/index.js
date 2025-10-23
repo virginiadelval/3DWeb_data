@@ -12,11 +12,11 @@ import {
   TextField,
   InputAdornment,
   Link
-} from '@material-ui/core'
-import EditIcon from '@material-ui/icons/Edit'
-import InfoOutlinedIcon from '@material-ui/icons/InfoOutlined'
+} from '@mui/material'
+import EditIcon from '@mui/icons-material/Edit'
+import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined'
 
-import useFontsStyles from 'theme/fontsDecorators'
+import decorators from 'theme/fontsDecorators'
 
 import ContainerBar from 'components/Sections/ContainerBar'
 import CustomTooltip from 'theme/wrappers/CustomTooltip'
@@ -24,42 +24,51 @@ import SelectParcel from 'components/Sections/SubSection/SelectParcel'
 
 import { actions as buildableActions } from 'state/ducks/buildable'
 
+import { actions as affectationsActions } from 'state/ducks/affectations'
+
 import { useDispatch, useSelector } from 'react-redux'
 
 import { getBuildable } from 'utils/configQueries'
 
-import useStyles from './styles'
+import styles from './styles'
 
 const ItemValues = ({ children, unit }) => {
   const values = children instanceof Array ? children : [children]
-  return values.map((v, idx) => (
-    `${idx > 0 ? ' | ' : ''} ${v === undefined ? '' : v} ${unit || ''}`
-  ))
+  return values.map(
+    (v, idx) =>
+      `${idx > 0 ? ' | ' : ''} ${v === undefined ? '' : v} ${unit || ''}`
+  )
 }
 const Details = ({
-  classes, title, data, items, isArea,
-  smp, decorators, isEditing, setIsEditing, info, link, valueLink
+  styles,
+  title,
+  data,
+  items,
+  isArea,
+  smp,
+  decorators,
+  isEditing,
+  isAffectation,
+  setIsEditing,
+  info,
+  link,
+  valueLink
 }) => {
   const dispatch = useDispatch()
   const [areaValue, setAreaValue] = useState(0)
 
   const handleOnAreaChange = ({ target: { value } }) => {
-    const isFloat = value[value.length - 1] === ','
-      ?? true
+    const isFloat = value[value.length - 1] === ',' ?? true
     const isEmpty = value === '' ?? true
 
     // eslint-disable-next-line no-nested-ternary
     const newAreaValue = isFloat
       ? value
       : isEmpty
-        ? 0
-        : Number.parseFloat(value.replace(/,/g, '.'))
+      ? 0
+      : Number.parseFloat(value.replace(/,/g, '.'))
 
-    setAreaValue(
-      Number.isNaN(newAreaValue)
-        ? areaValue
-        : newAreaValue
-    )
+    setAreaValue(Number.isNaN(newAreaValue) ? areaValue : newAreaValue)
   }
 
   useEffect(() => {
@@ -68,88 +77,79 @@ const Details = ({
     }
   }, [dispatch, smp, areaValue, isArea])
 
+  if (isAffectation) {
+    return (
+      <>
+        {data?.afectaciones?.length > 0 &&
+          data?.afectaciones.map(({ title, subtitle }) => (
+            <>
+              <Box sx={styles.title}>
+                <Typography variant="subtitle2" sx={decorators.bold}>
+                  {title}
+                </Typography>
+              </Box>
+              <ListItem sx={styles.listado}>{subtitle}</ListItem>
+            </>
+          ))}
+      </>
+    )
+  }
   return (
     <>
-      <Box className={classes.title}>
-        <Typography variant="subtitle2" className={decorators.bold}>
+      <Box sx={styles.title}>
+        <Typography variant="subtitle2" sx={decorators.bold}>
           {title}
         </Typography>
       </Box>
-      <Box className={classes.boxIcons}>
-        {
-          info && (
-            <CustomTooltip
-              className={classes.tooltip}
-              title={info}
-              placement="top"
-            >
-              <InfoOutlinedIcon
-                className={classes.info}
-              />
-            </CustomTooltip>
-          )
-        }
+      <Box sx={styles.boxIcons}>
+        {info && (
+          <CustomTooltip sx={styles.tooltip} title={info} placement="top">
+            <InfoOutlinedIcon sx={styles.info} />
+          </CustomTooltip>
+        )}
       </Box>
-      {
-        items && items.map(({ label, field, unidad }, idx) => (
-          <ListItem key={idx} className={classes.listado}>
+      {items &&
+        items.map(({ label, field, unidad }) => (
+          <ListItem key={unidad} sx={styles.listado}>
             {label}
-            {
-              isArea && isEditing
-                ? (
-                  <TextField
-                    className={classes.input}
-                    value={areaValue.toString().replace(/\./g, ',')}
-                    InputProps={{
-                      endAdornment: <InputAdornment position="end">{unidad}</InputAdornment>
-                    }}
-                    onChange={handleOnAreaChange}
-                  />
-                )
-                : (
-                  <>
-                    <ItemValues unit={unidad}>
-                      {
-                        field
-                          .split('.')
-                          .reduce((p, c) => p && p[c], data)
-                      }
-                    </ItemValues>
-                  </>
-                )
-            }
-            {
-              isArea && (
-                <IconButton
-                  onClick={() => setIsEditing(!isEditing)}
-                  className={classes.button}
-                >
-                  <EditIcon color={isEditing ? 'primary' : 'inherit'} />
-                </IconButton>
-              )
-            }
+            {isArea && isEditing ? (
+              <TextField
+                sx={styles.input}
+                value={areaValue.toString().replace(/\./g, ',')}
+                InputProps={{
+                  endAdornment: (
+                    <InputAdornment position="end">{unidad}</InputAdornment>
+                  )
+                }}
+                onChange={handleOnAreaChange}
+              />
+            ) : (
+              <>
+                <ItemValues unit={unidad}>
+                  {field.split('.').reduce((p, c) => p && p[c], data)}
+                </ItemValues>
+              </>
+            )}
+            {isArea && (
+              <IconButton
+                onClick={() => setIsEditing(!isEditing)}
+                sx={styles.button}
+              >
+                <EditIcon color={isEditing ? 'primary' : 'inherit'} />
+              </IconButton>
+            )}
           </ListItem>
-        ))
-      }
-      {
-        link && (
-          <Link
-            className={classes.link}
-            href={link}
-            target="_blank"
-            rel="noopener"
-          >
-            {valueLink}
-          </Link>
-        )
-      }
+        ))}
+      {link && (
+        <Link sx={styles.link} href={link} target="_blank" rel="noopener">
+          {valueLink}
+        </Link>
+      )}
     </>
   )
 }
 
 const Buildable = () => {
-  const classes = useStyles()
-  const decorators = useFontsStyles()
   const data = useSelector((state) => state.buildable.data)
   const dispatch = useDispatch()
   const smp = useSelector((state) => state.parcel.smp)
@@ -159,24 +159,39 @@ const Buildable = () => {
 
   useEffect(() => {
     dispatch(buildableActions.clickOnParcel(smp))
+    dispatch(affectationsActions.clickOnParcel(smp))
   }, [dispatch, smp])
   return (
-    <ContainerBar
-      type="list"
-    >
-      <Grid container className={classes.grid}>
-        {
-          getBuildable().map(({
-            title, items, isArea, isPlusvalia, large, info, link, valueLink
-          }, index) => {
+    <ContainerBar type="list">
+      <Grid container sx={styles.grid}>
+        {getBuildable().map(
+          ({
+            title,
+            items,
+            isArea,
+            isAffectation,
+            isPlusvalia,
+            large,
+            info,
+            link,
+            valueLink
+          }) => {
             const maxWidth = large === 6 ? 'small' : null
+            if (isAffectation && data?.afectaciones?.length <= 0) return
+
             return (
-              smp && !isLoading && (
-                <Grid key={index} item xs={12} className={`${classes.gridItem} ${classes[maxWidth]} `}>
+              smp &&
+              !isLoading && (
+                <Grid
+                  key={title}
+                  item
+                  xs={12}
+                  sx={{ ...styles['gridItem'], ...styles[maxWidth] }}
+                >
                   <Details
                     // eslint-disable-next-line react/no-array-index-key
-                    key={index}
-                    classes={classes}
+                    key={title}
+                    styles={styles}
                     decorators={decorators}
                     title={title}
                     items={items}
@@ -185,6 +200,7 @@ const Buildable = () => {
                     valueLink={valueLink}
                     data={isPlusvalia && isEditing ? plusvalia : data}
                     isArea={isArea}
+                    isAffectation={isAffectation}
                     isEditing={isEditing}
                     setIsEditing={setIsEditing}
                     smp={smp}
@@ -192,15 +208,11 @@ const Buildable = () => {
                 </Grid>
               )
             )
-          })
-        }
+          }
+        )}
       </Grid>
-      { !smp && !isLoading && <SelectParcel />}
-      { isLoading && (
-        <Typography variant="body1">
-          Cargando...
-        </Typography>
-      )}
+      {!smp && !isLoading && <SelectParcel />}
+      {isLoading && <Typography variant="body1">Cargando...</Typography>}
     </ContainerBar>
   )
 }
@@ -212,7 +224,7 @@ Details.defaultProps = {
   valueLink: ''
 }
 Details.propTypes = {
-  classes: PropTypes.objectOf(PropTypes.any).isRequired,
+  styles: PropTypes.objectOf(PropTypes.any).isRequired,
   decorators: PropTypes.objectOf(PropTypes.string).isRequired,
   title: PropTypes.string.isRequired,
   info: PropTypes.string,

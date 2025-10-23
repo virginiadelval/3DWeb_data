@@ -1,17 +1,6 @@
-import { makeStyles } from '@material-ui/core/styles'
+import theme from 'theme'
 
-export default makeStyles((theme) => ({
-  container: {
-    marginTop: theme.spacing(1.5),
-    width: theme.spacing(38.13), // 38.13 - 305px
-    padding: theme.spacing(0),
-    paddingLeft: theme.spacing(0.5) // 0.5  -   4px
-  },
-  responsive: {
-    [theme.breakpoints.down('sm')]: {
-      width: theme.spacing(30)
-    }
-  },
+const styles = {
   formControl: {
     marginRight: 0
   },
@@ -24,11 +13,14 @@ export default makeStyles((theme) => ({
     marginRight: theme.spacing(0.8),
     border: '1px solid grey'
   },
-  divider: {
-    height: theme.spacing(0.2)
-  },
   boxIcons: {
-    width: '100%'
+    width: '100%',
+    display: 'flex',
+    justifyContent: 'space-between',
+    alignItems: 'center'
+  },
+  iconsContainer: {
+    display: 'flex'
   },
   reference: {
     padding: 0,
@@ -41,17 +33,20 @@ export default makeStyles((theme) => ({
     height: '18px'
   },
   iconButton: {
-    padding: 0,
+    padding: '0px',
     float: 'right',
     marginLeft: theme.spacing(0.5)
   },
   downloadIcon: {
+    width: '21px',
     height: '18px'
   },
   referenceItems: {
-    padding: 5
+    padding: '5px'
   },
-  referenceTitle: {
-    paddingTop: theme.spacing(0.1)
-  }
-}))
+  referenceTitle: {},
+  accordion: { margin: '5px', border: '1px solid #D9D9D9' },
+  accordionSummary: { minHeight: '0px', height: '34px' }
+}
+
+export default styles

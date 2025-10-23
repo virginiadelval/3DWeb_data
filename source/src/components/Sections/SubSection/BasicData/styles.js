@@ -1,6 +1,6 @@
-import { makeStyles } from '@material-ui/core/styles'
+import theme from 'theme'
 
-export default makeStyles((theme) => ({
+const styles = {
   card: {
     height: theme.spacing(8),
     backgroundColor: '#F5F5F5',
@@ -11,5 +11,15 @@ export default makeStyles((theme) => ({
   },
   value: {
     textAlign: 'right'
+  },
+  link: {
+    color: '#0532ff !important'
+  },
+  parcelarioAlert: {
+    backgroundColor: '#F5F5F5',
+    padding: theme.spacing(1.5),
+    marginBottom: theme.spacing(2)
   }
-}))
+}
+
+export default styles

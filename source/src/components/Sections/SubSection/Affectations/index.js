@@ -2,11 +2,9 @@ import React, { useEffect } from 'react'
 
 import PropTypes from 'prop-types'
 
-import {
-  Box, Typography, Grid, makeStyles, Paper
-} from '@material-ui/core'
+import { Box, Typography, Grid, makeStyles, Paper } from '@mui/material'
 
-import useFontsStyles from 'theme/fontsDecorators'
+import decorators from 'theme/fontsDecorators'
 
 import ContainerBar from 'components/Sections/ContainerBar'
 import SelectParcel from 'components/Sections/SubSection/SelectParcel'
@@ -15,27 +13,28 @@ import { actions as affectationsActions } from 'state/ducks/affectations'
 
 import { useDispatch, useSelector } from 'react-redux'
 
-import useStyles from './styles'
+import styles from './styles'
 
-const Details = ({
-  classes, title, subtitle, fill, decorators
+export const AffectationDetails = ({
+  styles,
+  title,
+  subtitle,
+  fill,
+  decorators
 }) => (
-
   <Box>
-    <Box className={classes.card}>
+    <Box sx={styles.card}>
       <Grid container>
         <Grid item xs={12}>
-          <Typography variant="subtitle2" className={decorators.bold}>
+          <Typography variant="subtitle2" sx={decorators.bold}>
             {title}
           </Typography>
         </Grid>
         <Grid item xs={12}>
-          <Typography variant="subtitle2">
-            {subtitle}
-          </Typography>
+          <Typography variant="subtitle2">{subtitle}</Typography>
         </Grid>
-        <Grid item xs={12} className={classes.gridItem}>
-          <Typography variant="body2" className={classes.gridText}>
+        <Grid item xs={12} sx={styles.gridItem}>
+          <Typography variant="body2" sx={styles.gridText}>
             {fill}
           </Typography>
         </Grid>
@@ -45,8 +44,6 @@ const Details = ({
 )
 
 const Affectations = () => {
-  const classes = useStyles()
-  const decorators = useFontsStyles()
   const data = useSelector((state) => state.affectations.data)
   const dispatch = useDispatch()
   const smp = useSelector((state) => state.parcel.smp)
@@ -55,53 +52,52 @@ const Affectations = () => {
   useEffect(() => {
     dispatch(affectationsActions.clickOnParcel(smp))
   }, [dispatch, smp])
+
   return (
-    <ContainerBar
-      type="list"
-    >
-      {!isLoading && smp && data
-        && data.map(({
-          id, title, subtitle, desc
-        }) => (
-          <Details
+    <ContainerBar type="list">
+      {!isLoading &&
+        smp &&
+        data &&
+        data.map(({ id, title, subtitle, desc }) => (
+          <AffectationDetails
             key={id}
-            classes={classes}
+            styles={styles}
             decorators={decorators}
             subtitle={subtitle}
             title={title}
             fill={desc}
           />
         ))}
-      { !isLoading && smp && data && data.length === 0 && (
-        <Typography variant="body1" className={classes.body1}>
+      {!isLoading && smp && data && data.length === 0 && (
+        <Typography variant="body1" sx={styles.body1}>
           No posee afectaciones
         </Typography>
       )}
-      { smp && data === null && !isLoading && (
-        <Paper className={classes.paper}>
-          <Typography variant="body1" className={classes.body1}>
+      {smp && data === null && !isLoading && (
+        <Paper sx={styles.paper}>
+          <Typography variant="body1" sx={styles.body1}>
             No hay datos disponibles
           </Typography>
         </Paper>
       )}
-      { isLoading && (
-        <Typography variant="body1" className={classes.body1}>
+      {isLoading && (
+        <Typography variant="body1" sx={styles.body1}>
           Cargando...
         </Typography>
       )}
-      { !isLoading && !smp && <SelectParcel />}
+      {!isLoading && !smp && <SelectParcel />}
     </ContainerBar>
   )
 }
 
-Details.propTypes = {
-  classes: PropTypes.objectOf(makeStyles).isRequired,
+AffectationDetails.propTypes = {
+  styles: PropTypes.objectOf(makeStyles).isRequired,
   decorators: PropTypes.objectOf(PropTypes.string).isRequired,
   title: PropTypes.string.isRequired,
   subtitle: PropTypes.string.isRequired,
   fill: PropTypes.string
 }
-Details.defaultProps = {
+AffectationDetails.defaultProps = {
   fill: ''
 }
 

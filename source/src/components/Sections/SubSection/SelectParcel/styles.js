@@ -1,6 +1,6 @@
-import { makeStyles } from '@material-ui/core/styles'
+import theme from 'theme'
 
-export default makeStyles((theme) => ({
+const styles = {
   paper: {
     marginTop: theme.spacing(6),
     height: theme.spacing(25),
@@ -10,4 +10,5 @@ export default makeStyles((theme) => ({
     alignItems: 'center',
     justifyContent: 'center'
   }
-}))
+}
+export default styles

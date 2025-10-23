@@ -1,9 +1,9 @@
-import { makeStyles } from '@material-ui/core/styles'
+import theme from 'theme'
 
-export default makeStyles((theme) => ({
+const styles = {
   card: {
     padding: theme.spacing(1),
-    minHeight: theme.spacing(11),
+    minHeight: theme.spacing(8),
     marginBottom: theme.spacing(2.5),
     backgroundColor: '#F1F1F3',
     borderRadius: '5px',
@@ -11,4 +11,6 @@ export default makeStyles((theme) => ({
     borderWidth: 'thick',
     lineHeight: theme.spacing(20)
   }
-}))
+}
+
+export default styles

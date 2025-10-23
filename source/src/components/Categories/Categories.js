@@ -4,16 +4,14 @@ import PropTypes from 'prop-types'
 
 import { actions as basicDataActions } from 'state/ducks/basicData'
 
-import { Box } from '@material-ui/core'
+import { Box } from '@mui/material'
 
 import { useDispatch, useSelector } from 'react-redux'
 
 import Category from './Category'
-import useStyles from './styles'
+import styles from './styles'
 
 const Categories = ({ data }) => {
-  const classes = useStyles()
-
   const dispatch = useDispatch()
 
   const parcelCoords = useSelector((state) => state.map.selectedCoords)
@@ -25,21 +23,16 @@ const Categories = ({ data }) => {
   }, [parcelCoords, dispatch])
 
   useEffect(() => {
-    dispatch(basicDataActions.seekerParcel(seekerSmp))
+    if (seekerSmp) {
+      dispatch(basicDataActions.seekerParcel(seekerSmp))
+    }
   }, [seekerSmp, dispatch])
 
   return (
-    <Box className={classes.options}>
-      {
-        data.map(({ id, title, path }) => (
-          <Category
-            key={id}
-            id={id}
-            path={path}
-            title={title}
-          />
-        ))
-      }
+    <Box sx={styles.options}>
+      {data.map(({ id, title, path, url }) => (
+        <Category key={id} id={id} path={path} title={title} url={url} />
+      ))}
     </Box>
   )
 }

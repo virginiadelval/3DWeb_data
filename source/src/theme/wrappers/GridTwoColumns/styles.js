@@ -1,7 +1,6 @@
-import { makeStyles } from '@material-ui/core/styles'
-
-export default makeStyles(() => ({
+const styles = {
   formControl: {
     margin: 0
   }
-}))
+}
+export default styles

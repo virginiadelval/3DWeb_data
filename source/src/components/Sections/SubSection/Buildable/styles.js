@@ -1,6 +1,6 @@
-import { makeStyles } from '@material-ui/core/styles'
+import theme from 'theme'
 
-export default makeStyles((theme) => ({
+const styles = {
   gridItem: {
     backgroundColor: '#F5F5F5',
     padding: theme.spacing(1),
@@ -11,14 +11,15 @@ export default makeStyles((theme) => ({
     maxWidth: '47%'
   },
   button: {
-    padding: 0
+    padding: '0px'
   },
   listado: {
-    paddingLeft: 0
+    paddingLeft: '0px',
+    fontSize: '12px'
   },
   input: {
-    width: 100,
-    marginTop: -10
+    width: '100px',
+    marginTop: '-10px'
   },
   tooltip: {
     marginLeft: theme.spacing(0.5),
@@ -33,6 +34,20 @@ export default makeStyles((theme) => ({
     display: 'inline'
   },
   link: {
-    color: '#306BB3 !important'
+    color: '#0532ff !important',
+    fontSize: '12px'
+  },
+  card: {
+    minHeight: '103px',
+    backgroundColor: '#F5F5F5',
+    padding: theme.spacing(1.5),
+    marginTop: theme.spacing(1),
+    marginLeft: theme.spacing(1)
+  },
+  noAffectation: {
+    marginTop: theme.spacing(1),
+    marginLeft: theme.spacing(1)
   }
-}))
+}
+
+export default styles

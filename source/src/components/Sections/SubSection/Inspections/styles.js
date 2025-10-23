@@ -1,11 +1,11 @@
-import { makeStyles } from '@material-ui/core/styles'
+import theme from 'theme'
 
-export default makeStyles((theme) => ({
+const styles = {
   box: {
     marginLeft: theme.spacing(9.75), // 9.75 - 78px
     minHeight: '100vh',
     width: theme.spacing(86),
-    [theme.breakpoints.down('sm')]: {
+    xs: {
       maxWidth: theme.spacing(35)
     }
   },
@@ -24,7 +24,7 @@ export default makeStyles((theme) => ({
     minWidth: '0px !important'
   },
   tableCell: {
-    [theme.breakpoints.down('sm')]: {
+    xs: {
       padding: 0,
       textAlign: 'center'
     }
@@ -36,7 +36,9 @@ export default makeStyles((theme) => ({
   },
   info: {
     height: '17px',
-    width: '17px'
+    width: '17px',
+    marginTop: '3px',
+    marginLeft: theme.spacing(1)
   },
   iconButton: {
     marginTop: '3px',
@@ -51,5 +53,15 @@ export default makeStyles((theme) => ({
   title: {
     float: 'left',
     display: 'inline'
+  },
+  boxIcons: {
+    display: 'flex',
+    // justifyContent: 'center',
+    alignItems: 'center'
+  },
+  notFoundTitle: {
+    fontSize: '14px'
   }
-}))
+}
+
+export default styles

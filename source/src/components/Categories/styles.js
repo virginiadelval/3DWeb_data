@@ -1,6 +1,6 @@
-import { makeStyles } from '@material-ui/core/styles'
+import theme from 'theme'
 
-export default makeStyles((theme) => ({
+const styles = {
   options: {
     paddingTop: theme.spacing(4),
     height: '100%',
@@ -12,6 +12,7 @@ export default makeStyles((theme) => ({
     display: 'flex',
     flexDirection: 'column',
     justifyContent: 'center',
+    alingItems: 'center',
     margin: theme.spacing(0),
     padding: theme.spacing(0),
     paddingTop: theme.spacing(1),
@@ -19,15 +20,14 @@ export default makeStyles((theme) => ({
     textAlign: 'center',
     color: theme.palette.action.active,
     alignSelf: 'center',
-    '&:nth-last-child(2)': {
+    '&:nth-last-of-type(2)': {
       marginTop: 'auto'
     }
   },
-  optionSelected: {
-    color: 'yellow' // TODO: theme.palette.primary.main,
-  },
   icon: {
     width: '100%',
-    height: 'auto'
+    height: '36px'
   }
-}))
+}
+
+export default styles

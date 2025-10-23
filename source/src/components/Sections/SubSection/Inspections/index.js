@@ -2,18 +2,26 @@ import React, { useEffect } from 'react'
 import PropTypes from 'prop-types'
 
 import {
-  Box, Typography, TableContainer, Table, TableHead, TableRow,
-  TableCell, TableBody, makeStyles, IconButton
-} from '@material-ui/core'
+  Box,
+  Typography,
+  TableContainer,
+  Table,
+  TableHead,
+  TableRow,
+  TableCell,
+  TableBody,
+  makeStyles,
+  IconButton
+} from '@mui/material'
 
-import CloudDownloadOutlinedIcon from '@material-ui/icons/CloudDownloadOutlined'
-import InfoOutlinedIcon from '@material-ui/icons/InfoOutlined'
+import CloudDownloadOutlinedIcon from '@mui/icons-material/CloudDownloadOutlined'
+import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined'
 
 import ContainerBar from 'components/Sections/ContainerBar'
 import CustomTooltip from 'theme/wrappers/CustomTooltip'
 import SelectParcel from 'components/Sections/SubSection/SelectParcel'
 
-import useFontsStyles from 'theme/fontsDecorators'
+import decorators from 'theme/fontsDecorators'
 
 import { actions as inspectionActions } from 'state/ducks/inspections'
 
@@ -21,71 +29,60 @@ import { useDispatch, useSelector } from 'react-redux'
 
 import { getInspectionsGroups } from 'utils/configQueries'
 
-import useStyles from './styles'
+import styles from './styles'
 
-const GridPanel = ({
-  id, columns, data, styles: { bold, tableCell }
-}) => {
+const GridPanel = ({ id, columns, data, styles: { bold, tableCell } }) => {
   const tableData = data[id]
 
   return (
     <>
-      {
-        tableData.length === 0 && (
-          <TableContainer>
-            <Typography>
-              No posee
-            </Typography>
-          </TableContainer>
-        )
-      }
-      {
-        tableData.length >= 1 && (
-          <TableContainer>
-            <Table>
-              <TableHead>
-                <TableRow>
-                  {
-                    columns.map(({ label, field }) => (
-                      <TableCell key={field} className={tableCell}>
-                        <Typography variant="subtitle2" className={bold}>
-                          {label}
-                        </Typography>
-                      </TableCell>
-                    ))
-                  }
-                </TableRow>
-              </TableHead>
-              <TableBody styles={{ tableCell }}>
-                {
-                  // Se mapea cada una de las obras para dicha tabla
-                  // Por lo tanto se crea una nueva TableRow por cada obra
-                  tableData.map((row, idx) => (
-                    // eslint-disable-next-line react/no-array-index-key
-                    <TableRow key={idx}>
-                      {
-                        // Se mapean los valores de cada obra para cada columna
-                        columns.map(({ field }) => (
-                          <TableCell key={field} className={tableCell}>{row[field]}</TableCell>
-                        ))
-                      }
-                    </TableRow>
-                  ))
-                }
-              </TableBody>
-            </Table>
-          </TableContainer>
-        )
-      }
+      {tableData.length === 0 && (
+        <TableContainer>
+          <Typography sx={styles.notFoundTitle}>No posee</Typography>
+        </TableContainer>
+      )}
+      {tableData.length >= 1 && (
+        <TableContainer>
+          <Table>
+            <TableHead>
+              <TableRow>
+                {columns.map(({ label, field }) => (
+                  <TableCell key={field} sx={tableCell}>
+                    <Typography variant="subtitle2" sx={bold}>
+                      {label}
+                    </Typography>
+                  </TableCell>
+                ))}
+              </TableRow>
+            </TableHead>
+            <TableBody sx={tableCell}>
+              {
+                // Se mapea cada una de las obras para dicha tabla
+                // Por lo tanto se crea una nueva TableRow por cada obra
+                tableData.map((row, idx) => (
+                  // eslint-disable-next-line react/no-array-index-key
+                  <TableRow key={`${row.direccion}_${row.fecha}`}>
+                    {
+                      // Se mapean los valores de cada obra para cada columna
+                      columns.map(({ field }) => (
+                        <TableCell key={field} sx={tableCell}>
+                          {row[field]}
+                        </TableCell>
+                      ))
+                    }
+                  </TableRow>
+                ))
+              }
+            </TableBody>
+          </Table>
+        </TableContainer>
+      )}
     </>
   )
 }
 
 const Inspections = () => {
-  const classes = useStyles()
-  const decorators = useFontsStyles()
   const data = useSelector((state) => state.inspections.data)
-  // const data = useSelector((state) => state.works.data)
   const dispatch = useDispatch()
   const smp = useSelector((state) => state.parcel.smp)
 
@@ -94,58 +91,52 @@ const Inspections = () => {
   }, [dispatch, smp])
 
   return (
-    <ContainerBar
-      type="table"
-    >
-      <Box className={classes.boxContainer}>
-        {
-          Object.keys(data).length >= 1 && (
-            getInspectionsGroups().map(({
-              id, title, info, link, columns
-            }) => (
-              <Box className={classes.boxSubContainer} key={id}>
-                <Box className={classes.title}>
-                  <Typography variant="subtitle1" className={`${decorators.bold} ${decorators.marginBottom_ml}`}>
-                    {title}
-                  </Typography>
-                </Box>
-                <Box className={classes.boxIcons}>
-                  {
-                    info && (
-                      <CustomTooltip
-                        className={classes.tooltip}
-                        title={info}
-                        placement="top"
-                      >
-                        <InfoOutlinedIcon
-                          className={classes.info}
-                        />
-                      </CustomTooltip>
-                    )
-                  }
-                  <IconButton
-                    className={classes.iconButton}
-                    target="_blank"
-                    href={link}
-                  >
-                    <CloudDownloadOutlinedIcon
-                      className={classes.downloadIcon}
-                    />
-                  </IconButton>
-                </Box>
-                <GridPanel
-                  id={id}
-                  columns={columns}
-                  data={data}
-                  styles={{ ...decorators, ...classes }}
-                />
+    <ContainerBar type="table">
+      <Box sx={styles.boxContainer}>
+        {Object.keys(data).length >= 1 &&
+          getInspectionsGroups().map(({ id, title, info, link, columns }) => (
+            <Box sx={styles.boxSubContainer} key={id}>
+              <Box sx={styles.title}>
+                <Typography
+                  variant="subtitle1"
+                  sx={{
+                    ...decorators['bold'],
+                    ...decorators['marginBottom_ml'],
+                    ...styles['notFoundTitle']
+                  }}
+                >
+                  {title}
+                </Typography>
               </Box>
-            ))
-          )
-        }
-        {
-          data.length === 0 && <SelectParcel />
-        }
+              <Box sx={styles.boxIcons}>
+                {info && (
+                  <CustomTooltip
+                    sx={styles.tooltip}
+                    title={info}
+                    placement="top"
+                  >
+                    <IconButton
+                      sx={styles.iconButton}
+                      target="_blank"
+                      href={link}
+                    >
+                      <box-icon name="info-circle" color="#707070" />
+                    </IconButton>
+                  </CustomTooltip>
+                )}
+                <IconButton sx={styles.iconButton} target="_blank" href={link}>
+                  <box-icon name="cloud-download" color="#707070" />
+                </IconButton>
+              </Box>
+              <GridPanel
+                id={id}
+                columns={columns}
+                data={data}
+                styles={{ ...decorators, ...styles }}
+              />
+            </Box>
+          ))}
+        {data.length === 0 && <SelectParcel />}
       </Box>
     </ContainerBar>
   )

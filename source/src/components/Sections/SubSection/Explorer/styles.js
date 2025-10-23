@@ -1,6 +1,6 @@
-import { makeStyles } from '@material-ui/core/styles'
+import theme from 'theme'
 
-export default makeStyles((theme) => ({
+const styles = {
   combo: {
     marginBottom: theme.spacing(3)
   },
@@ -8,4 +8,6 @@ export default makeStyles((theme) => ({
     textAlign: 'center',
     marginTop: '30px'
   }
-}))
+}
+
+export default styles

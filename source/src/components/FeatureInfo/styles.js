@@ -1,6 +1,6 @@
-import { makeStyles } from '@material-ui/core/styles'
+import theme from 'theme'
 
-export default makeStyles((theme) => ({
+const styles = {
   featureInfo: {
     padding: '0 5px 1px 5px',
     overflowY: 'auto',
@@ -12,12 +12,15 @@ export default makeStyles((theme) => ({
     fontWeight: 'bold'
   },
   markerProperty: {
-    marginTop: '1px'
+    marginTop: '1px',
+    marginBottom: '5px'
   },
   ultimaActualizacion: {
-    fontWeight: 'bold'
+    fontWeight: 'normal'
   },
   goContainer: {
     paddingTop: theme.spacing(2)
   }
-}))
+}
+
+export default styles

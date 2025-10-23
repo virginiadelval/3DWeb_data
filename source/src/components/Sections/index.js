@@ -1,6 +1,6 @@
 import React from 'react'
 
-import { Drawer } from '@material-ui/core'
+import { Drawer } from '@mui/material'
 
 import { useSelector } from 'react-redux'
 
@@ -15,6 +15,11 @@ import LayerGroup from 'components/Sections/SubSection/LayerGroup'
 import Report from 'components/Sections/SubSection/Report'
 import Uses from 'components/Sections/SubSection/Uses'
 import Works from 'components/Sections/SubSection/Works'
+import Normative from 'components/Sections/SubSection/Normative'
+import LinksNormatives from 'components/Sections/SubSection/Normative/LinksNormatives'
+import PlusvaliaRights from 'components/Sections/SubSection/PlusvaliaRights'
+import IFC from './SubSection/IFC'
+import Patrimony from './SubSection/Patrimony'
 
 const Section = () => {
   const isShow = useSelector((state) => state.categories.sectionOpen)
@@ -23,7 +28,10 @@ const Section = () => {
   const sectionSelected = sectionId[lastIndex]
 
   const sectionComponents = new Map([
+    ['IFC', IFC],
+    ['Patrimony', Patrimony],
     ['Report', Report],
+    ['PlusvaliaRights', PlusvaliaRights],
     ['Information', Information],
     ['LayerGroup', LayerGroup],
     ['Explorer', Explorer],
@@ -33,15 +41,19 @@ const Section = () => {
     ['Uses', Uses],
     ['Works', Works],
     ['Affectations', Affectations],
-    ['Inspections', Inspections]
+    ['Normative', Normative],
+    ['Inspections', Inspections],
+    ['UrbanCode', LinksNormatives],
+    ['Urban Heritage', LinksNormatives],
+    ['Cadastre', LinksNormatives],
+    ['Plusvalia', LinksNormatives],
+    ['Edification', LinksNormatives],
+    ['Manuals and Instructions', LinksNormatives]
   ])
 
   const Selected = isShow && sectionComponents.get(sectionSelected)
   return (
-    <Drawer
-      variant="persistent"
-      open={isShow}
-    >
+    <Drawer variant="persistent" open={isShow}>
       {Selected && <Selected />}
     </Drawer>
   )

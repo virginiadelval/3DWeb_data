@@ -1,44 +1,131 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit'
 
-import { getParcel, getParcelBySmp } from 'utils/apiConfig'
+import {
+  getParcel,
+  getParcelBySmp,
+  getPhoto,
+  getPhotoData,
+  getDataApiServicioGeo,
+  getConstitucionEstadoParcelario
+} from 'utils/apiConfig'
 import { actions as mapActions } from 'state/ducks/map'
 import { actions as smpActions } from 'state/ducks/parcel'
+import { actions as buildActions } from 'state/ducks/buildable'
+import { actions as usesActions } from 'state/ducks/uses'
+import { setModelCoordinates } from './IFC'
 
 const cameraUpdated = (data, dispatch) => {
   const [lng, lat] = data.centroide
-  dispatch(mapActions.cameraUpdated({
-    lat, lng, zoom: 17, pitch: 60, bearing: 0
-  }))
+  dispatch(
+    mapActions.cameraUpdated({
+      lat,
+      lng,
+      zoom: 17,
+      pitch: 60,
+      bearing: 0
+    })
+  )
 }
+
+const getData = async ({ coord, smp }) => {
+  const url = coord ? getParcel(coord) : getParcelBySmp(smp)
+  const response = await fetch(url)
+  const data = await response.json()
+  const [x, y] = data?.centroide || [0, 0]
+  const { barrio = '', comuna = '' } = await fetch(
+    getDataApiServicioGeo(x, y)
+  ).then((r) => r.json())
+  return {
+    ...data,
+    barrio,
+    comuna
+  }
+}
+
 const selectedParcel = createAsyncThunk(
   'basicData/selectedParcel',
-  async (coord, { dispatch }) => {
-    const url = getParcel(coord)
-    const response = await fetch(url)
-    const data = (await response.json())
-    cameraUpdated(data, dispatch)
+  async (coord, { dispatch, getState }) => {
+    const data = await getData({ coord })
+    const { smp } = data
+    if (smp) {
+      if (!getState().parcel.smp) {
+        !getState().IFC.IFCModelBlob &&
+          dispatch(setModelCoordinates(data.centroide))
+        cameraUpdated(data, dispatch)
+      }
+      !getState().IFC.IFCModelBlob &&
+        dispatch(setModelCoordinates(data.centroide))
+      dispatch(buildActions.clickOnParcel(smp))
+      dispatch(smpActions.smpSelected(smp))
+      dispatch(smpActions.setIsParcelSelected(true))
+      dispatch(usesActions.setIsParcelaEnMicrocentro(null))
+      const urlPhotoData = getPhotoData(smp)
+      const photoData = await fetch(urlPhotoData)
+        .then((response) => response.text())
+        .then((text) => JSON.parse(text.slice(1, -1)))
 
-    dispatch(smpActions.smpSelected(data.smp))
-    return data
+      const constitucionEstadoParcelario = await fetch(
+        getConstitucionEstadoParcelario(smp)
+      )
+        .then((response) => response.json())
+        .then((data) => data)
+      return {
+        ...data,
+        photoData: photoData.map(({ fecha }, idx) => ({
+          fecha,
+          photo: getPhoto(smp, idx)
+        })),
+        constitucionEstadoParcelario
+      }
+    }
+    dispatch(smpActions.clean())
+    dispatch(smpActions.setIsParcelSelected(false))
+    return {
+      data: {
+        smp: null
+      },
+      photoData: []
+    }
   },
   {
-    condition: ({ lat, lng }, { getState }) => lat !== undefined
-      && lng !== undefined
-      && !getState().basicData.isLoading
+    condition: ({ lat, lng }, { getState }) =>
+      lat !== undefined &&
+      lng !== undefined &&
+      !getState().basicData.isLoading &&
+      !getState().map.isMeasureActive
   }
 )
 
 const seekerParcel = createAsyncThunk(
   'basicData/seekerParcel',
-  async (smp, { dispatch }) => {
+  async (smp, { dispatch, getState }) => {
     if (smp !== null && smp !== undefined) {
-      const url = getParcelBySmp(smp)
-      const response = await fetch(url)
-      const data = (await response.json())
-
+      const data = await getData({ smp })
+      !getState().IFC.IFCModelBlob &&
+        dispatch(setModelCoordinates(data.centroide))
       cameraUpdated(data, dispatch)
+      dispatch(buildActions.clickOnParcel(data.smp))
       dispatch(smpActions.smpSelected(data.smp))
-      return data
+      dispatch(smpActions.setIsParcelSelected(true))
+      const urlPhotoData = getPhotoData(smp)
+      const photoData = await fetch(urlPhotoData)
+        .then((response) => response.text())
+        .then((text) => JSON.parse(text.slice(1, -1)))
+
+      const constitucionEstadoParcelario = await fetch(
+        getConstitucionEstadoParcelario(smp)
+      )
+        .then((response) => response.json())
+        .then((data) => data)
+
+      return {
+        ...data,
+        photoData: photoData.map(({ fecha }, idx) => ({
+          fecha,
+          photo: getPhoto(smp, idx)
+        })),
+        constitucionEstadoParcelario
+      }
     }
     throw new Error()
   },

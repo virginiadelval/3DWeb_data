@@ -1,6 +1,12 @@
-import { makeStyles } from '@material-ui/core/styles'
+import theme from 'theme'
 
-export default makeStyles((theme) => ({
+const styles = {
+  container: {
+    marginBottom: '12px'
+  },
+  combo: {
+    marginBottom: theme.spacing(3)
+  },
   box: {
     border: '1px solid #D9D9D9',
     borderLeftWidth: 3,
@@ -11,11 +17,9 @@ export default makeStyles((theme) => ({
     border: '1px solid #D9D9D9'
   },
   button: {
-    // padding: 0,
     minWidth: '0 !important'
   },
   card: {
-    height: '103px',
     backgroundColor: '#F5F5F5',
     padding: theme.spacing(1.5),
     marginBottom: theme.spacing(2)
@@ -51,6 +55,8 @@ export default makeStyles((theme) => ({
     marginTop: theme.spacing(4)
   },
   link: {
-    color: '#306BB3 !important'
+    color: '#0532ff !important'
   }
-}))
+}
+
+export default styles
