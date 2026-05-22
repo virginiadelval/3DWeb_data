@@ -36,13 +36,8 @@
       "title": "Tutorial",
       "path": "tutorial",
       "url": ""
-    },
-    {
-      "id": "Contact",
-      "title": "Ayudanos a mejorar",
-      "path": "contact",
-      "url": "https://gestioncolaborativa.buenosaires.gob.ar/prestaciones"
     }
+   
   ],
   "explorer": [
     {
@@ -1039,33 +1034,12 @@
       "id": "BasicData",
       "title": "Datos Básicos",
       "color": "#34485e",
-      "info": "Esta información es relevada por la DGROC y AGIP. Si los datos plasmados no coinciden con la realidad, se solicita ratificarlos ante dicho organismo."
+      "info": "Esta es aportada por distintas fuentes. Si los datos plasmados no coinciden con la realidad, se solicita ratificarlos ante dicho organismo."
     },
-    {
-      "id": "Buildable",
-      "title": "Código Urbanístico",
-      "color": "#d80024"
-    },
-    {
-      "id": "Patrimony",
-      "title": "Patrimonio",
-      "color": "rgb(248, 27, 143)"
-    },
-    {
+     {
       "id": "IFC",
       "title": "Verificá tu proyecto",
       "color": "rgb(132, 142, 195)"
-    },
-    {
-      "id": "PlusvaliaRights",
-      "title": "Plusvalía/Derechos",
-      "color": "#d38c01"
-    },
-    {
-      "id": "Uses",
-      "title": "Usos",
-      "color": "#faf300",
-      "link": "{{urlBsAs}}desarrollourbano/codigo-urbanistico"
     },
     {
       "id": "Works",
@@ -1352,13 +1326,116 @@
       "format": ""
     },
     {
-      "title": "Municipio",
-      "fill": "comuna",
+      "title": "Tipo de Parcela",
+      "fill": "mvs_tipo",
+      "format": ""
+    },
+     {
+      "title": "Tipo de material de Calles",
+      "fill": "mvs_calle",
       "format": ""
     },
     {
-      "title": "Distrito Catastral",
+      "title": "Servicios de Agrotécnica Fueguina (AF)",
+      "fill": "mvs_af_header",
+      "format": ""
+    },
+    {
+      "title": "  • Recolección de residuos",
+      "fill": "mvs_recol",
+      "format": ""
+    },
+    {
+      "title": "  • Tipo de barrido",
+      "fill": "mvs_barrido",
+      "format": ""
+    },
+    {
+      "title": "Alumbrado público",
+      "fill": "mvs_lusal",
+      "format": ""
+    },
+    {
+      "title": "Mantenimiento de Espacios Verdes",
+      "fill": "mvs_ev",
+      "format": ""
+    },
+    {
+      "title": "Presencia de Semáforos",
+      "fill": "mvs_semaforo",
+      "format": ""
+    },
+         {
+      "title": "Propietario",
+      "fill": "owner_name",
+      "format": ""
+    },
+    {
+      "title": "Documento del propietario",
+      "fill": "owner_document",
+      "format": ""
+    },
+    {
+      "title": "CUIT del propietario",
+      "fill": "owner_cuit",
+      "format": ""
+    },
+  
+    {
+      "title": "Distrito ",
       "fill": "distrito",
+      "format": ""
+    },
+    {
+      "title": "Zonificación de CPUA",
+      "fill": "zoning_distrito",
+      "format": ""
+    },
+    {
+      "title": "F.O.S.",
+      "fill": "zoning_fos",
+      "format": ""
+    },
+    {
+      "title": "F.O.T. Privado",
+      "fill": "zoning_fot_privado",
+      "format": ""
+    },
+    {
+      "title": "F.O.T. Público",
+      "fill": "zoning_fot_publico",
+      "format": ""
+    },
+    {
+      "title": "Altura Máxima",
+      "fill": "zoning_altura_m",
+      "format": " m"
+    },
+    {
+      "title": "Retiro de Fondo",
+      "fill": "zoning_retiro_fondo",
+      "format": ""
+    },
+    {
+      "title": "Retiro de Frente",
+      "fill": "zoning_retiro_frente",
+      "format": ""
+    },
+    {
+      "title": "Criterio",
+      "fill": "zoning_criterio",
+      "format": ""
+    },
+    {
+      "title": "Área",
+      "fill": "zoning_area",
+      "format": ""
+    },
+  
+   
+    {
+      "title": "Rango de Valor del Suelo",
+      "fill": "mvs_valor_rang",
       "format": ""
     },
     {
@@ -1369,86 +1446,6 @@
     {
       "title": "Longitud",
       "fill": "longitud",
-      "format": ""
-    },
-    {
-      "title": "Zonificación / Distrito CPUA",
-      "fill": "zoning_distrito",
-      "format": ""
-    },
-    {
-      "title": "Zonificación / F.O.S.",
-      "fill": "zoning_fos",
-      "format": ""
-    },
-    {
-      "title": "Zonificación / F.O.T. Privado",
-      "fill": "zoning_fot_privado",
-      "format": ""
-    },
-    {
-      "title": "Zonificación / F.O.T. Público",
-      "fill": "zoning_fot_publico",
-      "format": ""
-    },
-    {
-      "title": "Zonificación / Altura Máxima",
-      "fill": "zoning_altura_m",
-      "format": " m"
-    },
-    {
-      "title": "Zonificación / Retiro de Fondo",
-      "fill": "zoning_retiro_fondo",
-      "format": ""
-    },
-    {
-      "title": "Zonificación / Retiro de Frente",
-      "fill": "zoning_retiro_frente",
-      "format": ""
-    },
-    {
-      "title": "Zonificación / Criterio",
-      "fill": "zoning_criterio",
-      "format": ""
-    },
-    {
-      "title": "Zonificación / Área",
-      "fill": "zoning_area",
-      "format": ""
-    },
-    {
-      "title": "Zonificación / Área 2",
-      "fill": "zoning_area2",
-      "format": ""
-    },
-    {
-      "title": "Propietario (PH)",
-      "fill": "owner_name",
-      "format": ""
-    },
-    {
-      "title": "Documento (PH)",
-      "fill": "owner_document",
-      "format": ""
-    },
-    {
-      "title": "CUIT (PH)",
-      "fill": "owner_cuit",
-      "format": ""
-    },
-    {
-      "title": "Más Valor Suelo / Tipo",
-      "fill": "mvs_tipo",
-      "format": ""
-    },
-    {
-      "title": "Más Valor Suelo / COD_LINK",
-      "fill": "mvs_cod_link",
-      "format": ""
-    },
-    {
-      "title": "Más Valor Suelo / Rango de Valor",
-      "fill": "mvs_valor_rang",
       "format": ""
     }
   ],
@@ -2417,6 +2414,13 @@
           "https://mt1.google.com/vt/lyrs=s&x={x}&y={y}&z={z}"
         ],
         "tileSize": 256
+      },
+      "capabase_3": {
+        "type": "raster",
+        "tiles": [
+          "https://wms.ign.gob.ar/geoserver/gwc/service/tms/1.0.0/mapabase_gris@EPSG%3A3857@png/{z}/{x}/{-y}.png"
+        ],
+        "tileSize": 256
       }
     },
     "layers": [
@@ -2433,6 +2437,15 @@
         "id": "baseLayer_secundario",
         "type": "raster",
         "source": "capabase_2",
+        "layout": {
+          "visibility": "none"
+        },
+        "paint": {}
+      },
+      {
+        "id": "baseLayer_argenmap",
+        "type": "raster",
+        "source": "capabase_3",
         "layout": {
           "visibility": "none"
         },

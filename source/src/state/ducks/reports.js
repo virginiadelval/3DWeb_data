@@ -2,6 +2,76 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit'
 import buildPDF from 'utils/reportTemplate'
 
+const decodeCodLink = (codLink) => {
+  const defaults = {
+    mvs_calle: 'Sin Dato',
+    mvs_recol: 'Sin Dato',
+    mvs_barrido: 'Sin Dato',
+    mvs_lusal: 'Sin Dato',
+    mvs_ev: 'Sin Dato',
+    mvs_semaforo: 'Sin Dato'
+  }
+
+  if (!codLink) {
+    return defaults
+  }
+
+  const codStr = String(codLink).trim()
+  if (codStr.length < 12) {
+    return defaults
+  }
+
+  const cCalle = codStr.substring(0, 2)
+  const cRecol = codStr.substring(2, 4)
+  const cBarrido = codStr.substring(4, 6)
+  const cLusal = codStr.substring(6, 8)
+  const cEv = codStr.substring(8, 10)
+  const cSemaforo = codStr.substring(10, 12)
+
+  const mapping = {
+    calle: {
+      '10': 'Asfalto/Hormigón/Bituminoso/Adoquín',
+      '11': 'Tierra con Cordón Cuneta',
+      '12': 'Tierra sin Cordón Cuneta / Sin Dato'
+    },
+    recol: {
+      '20': 'Especial (centro/gastronómico)',
+      '21': 'Servicio matutino y nocturno',
+      '22': 'Contenedores (6 barrios)',
+      '23': 'Sin servicio'
+    },
+    barrido: {
+      '30': 'Especial (centro/gastronómico)',
+      '31': '6 veces por semana',
+      '32': '3 veces por semana',
+      '33': '1–2 veces por semana',
+      '34': 'Sin servicio'
+    },
+    lusal: {
+      '40': 'Lámpara LED',
+      '41': 'Otro tipo de lámpara',
+      '42': 'Sin servicio'
+    },
+    ev: {
+      '50': 'Con servicio',
+      '51': 'Sin servicio'
+    },
+    semaforo: {
+      '60': 'Con semáforo',
+      '61': 'Sin semáforo'
+    }
+  }
+
+  return {
+    mvs_calle: mapping.calle[cCalle] || 'Sin Dato',
+    mvs_recol: mapping.recol[cRecol] || 'Sin Dato',
+    mvs_barrido: mapping.barrido[cBarrido] || 'Sin Dato',
+    mvs_lusal: mapping.lusal[cLusal] || 'Sin Dato',
+    mvs_ev: mapping.ev[cEv] || 'Sin Dato',
+    mvs_semaforo: mapping.semaforo[cSemaforo] || 'Sin Dato'
+  }
+}
+
 const getData = createAsyncThunk(
   'report/getData',
   async (smp, { getState }) => {
@@ -195,6 +265,8 @@ const getData = createAsyncThunk(
       mvs_valor_rang
     } = basicDataState
 
+    const decodedLink = decodeCodLink(mvs_cod_link)
+
     const sections = [
       {
         title: 'Información General',
@@ -294,12 +366,36 @@ const getData = createAsyncThunk(
             value: mvs_tipo ?? 'N/A'
           },
           {
-            name: 'Código de Enlace (COD_LINK)',
-            value: mvs_cod_link ?? 'N/A'
-          },
-          {
             name: 'Rango de Valor del Suelo',
             value: mvs_valor_rang ?? 'N/A'
+          },
+          {
+            name: 'Tipo de material de Calles',
+            value: decodedLink.mvs_calle
+          },
+          {
+            name: 'Servicios de Agrotécnica Fueguina (AF)',
+            value: ' '
+          },
+          {
+            name: '  • Recolección de residuos',
+            value: decodedLink.mvs_recol
+          },
+          {
+            name: '  • Tipo de barrido',
+            value: decodedLink.mvs_barrido
+          },
+          {
+            name: 'Alumbrado público',
+            value: decodedLink.mvs_lusal
+          },
+          {
+            name: 'Mantenimiento de Espacios Verdes',
+            value: decodedLink.mvs_ev
+          },
+          {
+            name: 'Presencia de Semáforos',
+            value: decodedLink.mvs_semaforo
           }
         ]
       }

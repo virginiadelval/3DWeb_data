@@ -12,7 +12,7 @@ import { fetchWmsGetFeatureInfo } from 'utils/wmsLayerManager'
 
 import MapaInteractivoGL from 'utils/MapaInteractivoGL'
 
-import Seeker from 'components/Seeker/OldSeeker'
+import Seeker from 'components/Seeker/Seeker'
 
 import FeatureInfo from 'components/FeatureInfo/FeatureInfo'
 import Measure from 'components/Measure'
@@ -23,6 +23,7 @@ import decorators from 'theme/fontsDecorators'
 
 import imgCapaBasePrincipal from 'img/capabase_1.png'
 import imgCapaBaseSecundaria from 'img/capabase_2.png'
+import imgCapaBaseArgenmap from 'img/capabase_3.png'
 
 import PropTypes from 'prop-types'
 import styles from './styles'
@@ -74,7 +75,7 @@ const Map = ({ children }) => {
   const [mapGL, setMapGL] = useState(null)
 
   const dispatch = useDispatch()
-  const [capabasePrincipal, setCapabasePrincipal] = useState(true)
+  const [activeBaseLayer, setActiveBaseLayer] = useState('baseLayer_principal')
 
   useEffect(() => {
     if (isMapReady && cameraLat) {
@@ -137,13 +138,24 @@ const Map = ({ children }) => {
   )
 
   useEffect(() => {
-    if (
-      isMapReady &&
-      mapGL.isVisibleBaseLayerPrincipal() === capabasePrincipal
-    ) {
-      mapGL.toggleBaseLayer()
+    if (isMapReady && mapGL) {
+      const map = mapGL.map
+      const layers = [
+        'baseLayer_principal',
+        'baseLayer_secundario',
+        'baseLayer_argenmap'
+      ]
+      layers.forEach((layerId) => {
+        if (map.getLayer(layerId)) {
+          map.setLayoutProperty(
+            layerId,
+            'visibility',
+            activeBaseLayer === layerId ? 'visible' : 'none'
+          )
+        }
+      })
     }
-  }, [capabasePrincipal, mapGL, isMapReady])
+  }, [activeBaseLayer, mapGL, isMapReady])
 
   const selectedCoords = useSelector((state) => state.map.selectedCoords)
   const wmsLayers = useSelector((state) => state.map.wmsLayers)
@@ -295,16 +307,42 @@ const Map = ({ children }) => {
       <Box id="map" sx={styles.container}>
         <Box sx={styles.bottomMenu}>
           <MinimapOption
-            imageUrl={`url(${
-              capabasePrincipal ? imgCapaBaseSecundaria : imgCapaBasePrincipal
-            })`}
-            onClick={() => setCapabasePrincipal(!capabasePrincipal)}
-            text={capabasePrincipal ? 'SATÉLITE' : 'MAPA'}
+            imageUrl={`url(${imgCapaBasePrincipal})`}
+            onClick={() => setActiveBaseLayer('baseLayer_principal')}
+            text="OSM"
+            style={{
+              border:
+                activeBaseLayer === 'baseLayer_principal'
+                  ? '3px solid #1a73e8'
+                  : '2px solid #fff'
+            }}
+          />
+          <MinimapOption
+            imageUrl={`url(${imgCapaBaseSecundaria})`}
+            onClick={() => setActiveBaseLayer('baseLayer_secundario')}
+            text="GOOGLE MAPS"
+            style={{
+              border:
+                activeBaseLayer === 'baseLayer_secundario'
+                  ? '3px solid #1a73e8'
+                  : '2px solid #fff'
+            }}
+          />
+          <MinimapOption
+            imageUrl={`url(${imgCapaBaseArgenmap})`}
+            onClick={() => setActiveBaseLayer('baseLayer_argenmap')}
+            text="ARGENMAP"
+            style={{
+              border:
+                activeBaseLayer === 'baseLayer_argenmap'
+                  ? '3px solid #1a73e8'
+                  : '2px solid #fff'
+            }}
           />
         </Box>
-        <Measure />
+        {/* <Measure /> */}
         <DimensionBtn />
-        <VolumenButton />
+        {/* <VolumenButton /> */}
         {isMapReady && children}
       </Box>
       <Box sx={styles.topMenu}>

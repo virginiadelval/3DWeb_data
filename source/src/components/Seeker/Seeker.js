@@ -19,25 +19,26 @@ import Downshift from 'downshift'
 import PropTypes from 'prop-types'
 
 import styles from './styles'
-import { Autocompleter as NewAutocompleter } from 'autocompleter-caba/dist/src'
 import useDebounce from '../../hooks/useDebounce'
 
 const Seeker = ({ onSelectItem }) => {
   const [suggestions, setSuggestions] = useState([])
   const { debounce } = useDebounce()
 
-  const newAutocompleter = new NewAutocompleter()
-
-  const handleNewAutocompleter = async (event) => {
-    const text = event.target.value
-    if (!text) return
+  const handleNewAutocompleter = async (text) => {
+    if (!text || text.trim().length < 3) {
+      setSuggestions([])
+      return
+    }
     try {
-      const suggestions = await newAutocompleter.getSuggestions(text)
-
-      const filteredSuggestions = suggestions.filter(
-        (suggestion) => suggestion.error !== true
+      const response = await fetch(
+        `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(
+          text
+        )}&format=json&addressdetails=1&limit=10&bounded=1&viewbox=-65.57,-24.69,-65.31,-24.93`
       )
-      if (filteredSuggestions.length === 0) {
+      const data = await response.json()
+
+      if (!data || data.length === 0) {
         setSuggestions([
           {
             type: 'tipoalerta',
@@ -46,66 +47,65 @@ const Seeker = ({ onSelectItem }) => {
         ])
         return
       }
-      setSuggestions(filteredSuggestions)
-    } catch (error) {}
-  }
 
-  const handleSearchDirection = async (suggestionText, onSelectItem, type) => {
-    try {
-      const suggestion = await newAutocompleter.getSearch(suggestionText)
-
-      if (suggestion?.error) {
-        setSuggestions([
-          {
-            type: 'tipoalerta',
-            title: suggestion.error
+      const mappedSuggestions = data.map((item) => {
+        let title = item.display_name
+        if (item.address) {
+          const mainName =
+            item.address.road ||
+            item.address.pedestrian ||
+            item.address.amenity ||
+            item.address.building ||
+            item.name
+          if (mainName) {
+            title = [mainName, item.address.house_number]
+              .filter(Boolean)
+              .join(' ')
           }
-        ])
-        throw suggestion.error
-      }
-
-      if (type === 'address') {
-        setSuggestions([])
-        onSelectItem({
+        }
+        return {
+          type: 'address',
+          title: title,
+          value: title,
+          subTitle: item.display_name,
           data: {
-            ...suggestion.data,
-            coordenadas: {
-              x: suggestion.data.coordenada_x,
-              y: suggestion.data.coordenada_y
-            }
+            smp: '',
+            coordenadas: { x: parseFloat(item.lon), y: parseFloat(item.lat) }
           }
-        })
-      }
+        }
+      })
 
-      if (type === 'place') {
-        setSuggestions([])
-        onSelectItem(suggestion)
-      }
+      setSuggestions(mappedSuggestions)
     } catch (error) {
-      console.log(error, 'error, handleSearchDirection')
+      console.error('Error loading suggestions from Nominatim:', error)
+      setSuggestions([
+        {
+          type: 'tipoalerta',
+          title: 'Error de conexión al buscar la dirección'
+        }
+      ])
     }
   }
 
   const handleSearch = useCallback(
-    debounce((e) => handleNewAutocompleter(e), 750),
+    debounce((text) => handleNewAutocompleter(text), 750),
     []
   )
 
   const handleSelectItem = (selectedSuggestion) => {
-    if (selectedSuggestion.type !== 'tipoalerta')
-      handleSearchDirection(
-        selectedSuggestion.value,
-        onSelectItem,
-        selectedSuggestion.type
-      )
-
-    if (selectedSuggestion.type === 'tipoalerta') {
+    if (selectedSuggestion && selectedSuggestion.type !== 'tipoalerta') {
+      setSuggestions([])
+      onSelectItem(selectedSuggestion)
+    } else {
       setSuggestions([])
     }
   }
 
   const handleInputBlur = () => {
-    setSuggestions([])
+    // Retrasar el borrado de sugerencias para permitir el evento onClick del listado
+    setTimeout(() => {
+      setSuggestions([])
+    }, 200)
   }
 
   const renderInput = (props) => {
@@ -177,9 +177,9 @@ const Seeker = ({ onSelectItem }) => {
           selectedItem
         }) => {
           const { onBlur, onFocus, ...inputProps } = getInputProps({
-            placeholder: 'Buscar',
+            placeholder: 'Buscar dirección en Salta...',
             onChange: (e) => {
-              handleSearch(e)
+              handleSearch(e.target.value)
             }
           })
 

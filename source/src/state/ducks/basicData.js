@@ -27,6 +27,76 @@ const cameraUpdated = (data, dispatch) => {
   )
 }
 
+const decodeCodLink = (codLink) => {
+  const defaults = {
+    mvs_calle: 'Sin Dato',
+    mvs_recol: 'Sin Dato',
+    mvs_barrido: 'Sin Dato',
+    mvs_lusal: 'Sin Dato',
+    mvs_ev: 'Sin Dato',
+    mvs_semaforo: 'Sin Dato'
+  }
+
+  if (!codLink) {
+    return defaults
+  }
+
+  const codStr = String(codLink).trim()
+  if (codStr.length < 12) {
+    return defaults
+  }
+
+  const cCalle = codStr.substring(0, 2)
+  const cRecol = codStr.substring(2, 4)
+  const cBarrido = codStr.substring(4, 6)
+  const cLusal = codStr.substring(6, 8)
+  const cEv = codStr.substring(8, 10)
+  const cSemaforo = codStr.substring(10, 12)
+
+  const mapping = {
+    calle: {
+      '10': 'Asfalto/Hormigón <br>Bituminoso/Adoquín',
+      '11': 'Tierra con Cordón Cuneta',
+      '12': 'Tierra sin Cordón Cuneta / Sin Dato'
+    },
+    recol: {
+      '20': 'Especial (centro/gastronómico)',
+      '21': 'Servicio matutino y nocturno',
+      '22': 'Contenedores (6 barrios)',
+      '23': 'Sin servicio'
+    },
+    barrido: {
+      '30': 'Especial (centro/gastronómico)',
+      '31': '6 veces por semana',
+      '32': '3 veces por semana',
+      '33': '1–2 veces por semana',
+      '34': 'Sin servicio'
+    },
+    lusal: {
+      '40': 'Lámpara LED',
+      '41': 'Otro tipo de lámpara',
+      '42': 'Sin servicio'
+    },
+    ev: {
+      '50': 'Con servicio',
+      '51': 'Sin servicio'
+    },
+    semaforo: {
+      '60': 'Con semáforo',
+      '61': 'Sin semáforo'
+    }
+  }
+
+  return {
+    mvs_calle: mapping.calle[cCalle] || 'Sin Dato',
+    mvs_recol: mapping.recol[cRecol] || 'Sin Dato',
+    mvs_barrido: mapping.barrido[cBarrido] || 'Sin Dato',
+    mvs_lusal: mapping.lusal[cLusal] || 'Sin Dato',
+    mvs_ev: mapping.ev[cEv] || 'Sin Dato',
+    mvs_semaforo: mapping.semaforo[cSemaforo] || 'Sin Dato'
+  }
+}
+
 const getData = async ({ coord, smp }) => {
   let catastro = smp
 
@@ -217,7 +287,9 @@ const getData = async ({ coord, smp }) => {
     // New Soil Value properties
     mvs_tipo: mvProps.Tipo || 'N/A',
     mvs_cod_link: mvProps.COD_LINK || 'N/A',
-    mvs_valor_rang: mvProps.Valor_Rang || 'N/A'
+    mvs_valor_rang: mvProps.Valor_Rang || 'N/A',
+    ...decodeCodLink(mvProps.COD_LINK),
+    mvs_af_header: ' '
   }
 }
 

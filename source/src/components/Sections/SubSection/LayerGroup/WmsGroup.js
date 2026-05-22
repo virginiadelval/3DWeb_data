@@ -22,6 +22,7 @@ import SettingsIcon from '@mui/icons-material/Settings'
 import ZoomInIcon from '@mui/icons-material/ZoomIn'
 import ArrowUpwardIcon from '@mui/icons-material/ArrowUpward'
 import ArrowDownwardIcon from '@mui/icons-material/ArrowDownward'
+import ExpandMoreIcon from '@mui/icons-material/ExpandMore'
 
 import { useDispatch, useSelector } from 'react-redux'
 import { actions } from 'state/ducks/map'
@@ -277,6 +278,64 @@ const WmsItem = ({ id, name, visible, opacity, url, layers, isFirst, isLast }) =
   )
 }
 
+const CATEGORIES = [
+  {
+    title: 'Barrios',
+    ids: ['wms_barrios', 'wms_loteos']
+  },
+  {
+    title: 'Espacios verdes',
+    ids: ['wms_espacios_verdes']
+  },
+  {
+    title: 'Oficinas Municipales',
+    ids: ['wms_oficinas_municipales']
+  },
+  {
+    title: 'CIC',
+    ids: ['wms_cic']
+  },
+  {
+    title: 'CPUA',
+    ids: [
+      'wms_ejido',
+      'wms_puc',
+      'wms_catastros',
+      'wms_manzanas',
+      'wms_zonificacion',
+      'wms_convenio_ordenanza',
+      'wms_piu',
+      'wms_ius',
+      'wms_red_vial',
+      'wms_codigo_prac'
+    ]
+  },
+  {
+    title: 'Control Ciudadano',
+    ids: ['wms_carteleria', 'wms_reclamos', 'wms_mico_macocentro']
+  },
+  {
+    title: 'Zonificación Tributaria',
+    ids: [
+      'wms_zonificacion_ii',
+      'wms_zonificacion_tgi',
+      'wms_zonificacion_comercial'
+    ]
+  },
+  {
+    title: 'Servicios',
+    ids: ['wms_luminarias', 'wms_barrios_limpieza']
+  },
+  {
+    title: 'Estacionamiento Medido',
+    ids: [
+      'wms_estacionamiento_medido',
+      'wms_estacionamiento_prohibido',
+      'wms_estacionamiento_libre'
+    ]
+  }
+]
+
 const WmsGroup = () => {
   const wmsLayers = useSelector((state) => state.map.wmsLayers)
 
@@ -284,29 +343,68 @@ const WmsGroup = () => {
     return null
   }
 
+  // Agrupamiento de capas en sus respectivas categorías
+  const categorizedLayers = CATEGORIES.map((cat) => {
+    const layers = wmsLayers.filter((l) => cat.ids.includes(l.id))
+    return {
+      title: cat.title,
+      layers
+    }
+  }).filter((cat) => cat.layers.length > 0)
+
+  // Capas que no quedaron clasificadas en ninguna categoría
+  const allCategorizedIds = CATEGORIES.flatMap((cat) => cat.ids)
+  const uncategorizedLayers = wmsLayers.filter(
+    (l) => !allCategorizedIds.includes(l.id)
+  )
+
+  if (uncategorizedLayers.length > 0) {
+    categorizedLayers.push({
+      title: 'Otras Capas',
+      layers: uncategorizedLayers
+    })
+  }
+
   return (
-    <Accordion sx={styles.accordion} disableGutters defaultExpanded>
-      <AccordionSummary sx={styles.accordionSummary}>
-        <Typography
-          variant="subtitle2"
-          sx={{ ...decorators['bold'], fontSize: '12px' }}
+    <Box sx={{ width: '100%' }}>
+      {categorizedLayers.map((cat) => (
+        <Accordion
+          key={cat.title}
+          sx={styles.accordion}
+          disableGutters
+          defaultExpanded={cat.title === 'CPUA'}
         >
-          CPUA
-        </Typography>
-      </AccordionSummary>
-      <AccordionDetails sx={{ paddingLeft: '20px' }}>
-        <List sx={{ padding: '0px' }}>
-          {wmsLayers.map((layer, index) => (
-            <WmsItem
-              key={layer.id}
-              {...layer}
-              isFirst={index === 0}
-              isLast={index === wmsLayers.length - 1}
-            />
-          ))}
-        </List>
-      </AccordionDetails>
-    </Accordion>
+          <AccordionSummary
+            expandIcon={<ExpandMoreIcon sx={{ fontSize: 18 }} />}
+            sx={styles.accordionSummary}
+          >
+            <Typography
+              variant="subtitle2"
+              sx={{ ...decorators['bold'], fontSize: '12px' }}
+            >
+              {cat.title}
+            </Typography>
+          </AccordionSummary>
+          <AccordionDetails sx={{ paddingLeft: '20px', paddingRight: '10px' }}>
+            <List sx={{ padding: '0px' }}>
+              {cat.layers.map((layer) => {
+                const globalIndex = wmsLayers.findIndex(
+                  (l) => l.id === layer.id
+                )
+                return (
+                  <WmsItem
+                    key={layer.id}
+                    {...layer}
+                    isFirst={globalIndex === 0}
+                    isLast={globalIndex === wmsLayers.length - 1}
+                  />
+                )
+              })}
+            </List>
+          </AccordionDetails>
+        </Accordion>
+      ))}
+    </Box>
   )
 }
 

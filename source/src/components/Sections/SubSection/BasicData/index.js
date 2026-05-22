@@ -23,7 +23,7 @@ const Details = ({ styles, decorators, title, value, format }) => (
     <Box sx={styles.card}>
       <Grid container>
         <Grid item xs={7}>
-          <Typography variant="subtitle2" sx={decorators.bold}>
+          <Typography variant="subtitle2" sx={{ ...decorators.bold, whiteSpace: 'pre-wrap' }}>
             {title}
           </Typography>
         </Grid>
