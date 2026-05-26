@@ -18,6 +18,7 @@ import FeatureInfo from 'components/FeatureInfo/FeatureInfo'
 import Measure from 'components/Measure'
 import DimensionBtn from 'components/DimensionBtn'
 import VolumenButton from 'components/VolumeButton'
+import Buildings3D from 'components/Buildings3D'
 
 import decorators from 'theme/fontsDecorators'
 
@@ -341,8 +342,9 @@ const Map = ({ children }) => {
           />
         </Box>
         {/* <Measure /> */}
-        <DimensionBtn />
+        {/* <DimensionBtn /> */}
         {/* <VolumenButton /> */}
+        <Buildings3D />
         {isMapReady && children}
       </Box>
       <Box sx={styles.topMenu}>
