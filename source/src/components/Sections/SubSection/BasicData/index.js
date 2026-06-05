@@ -2,7 +2,8 @@ import React, { useState } from 'react'
 
 import PropTypes from 'prop-types'
 
-import { Box, Typography, Grid, makeStyles, Link, TextField, Button, CircularProgress, Alert } from '@mui/material'
+import { Box, Typography, Grid, makeStyles, Link, TextField, Button, CircularProgress, Alert, Accordion, AccordionSummary, AccordionDetails, List, ListItem, ListItemText } from '@mui/material'
+import ExpandMoreIcon from '@mui/icons-material/ExpandMore'
 
 import decorators from 'theme/fontsDecorators'
 
@@ -61,7 +62,7 @@ const BasicData = () => {
     (state) => state.buildable.data.superficie_parcela
   )
   const isSelected = useSelector((state) => state.basicData.isSelected)
-  const { photoData } = data
+  const { photoData, regimen, actividades } = data
 
   const dispatch = useDispatch()
   const [searchCatastro, setSearchCatastro] = useState('')
@@ -92,6 +93,56 @@ const BasicData = () => {
   const handleClearParcel = () => {
     dispatch(parcelActions.clean())
     dispatch(basicDataActions.clean())
+  }
+
+  const renderActivitiesByState = (activitiesList) => {
+    if (!activitiesList || activitiesList.length === 0) {
+      return <Typography variant="caption">No hay actividades registradas para este distrito.</Typography>
+    }
+
+    // Group by estado, then by categoria
+    const grouped = {}
+    activitiesList.forEach((act) => {
+      const estado = act.estado || 'Otros'
+      if (!grouped[estado]) grouped[estado] = {}
+      const cat = act.categoria || 'Sin Categoría'
+      if (!grouped[estado][cat]) grouped[estado][cat] = []
+      grouped[estado][cat].push(act)
+    })
+
+    return Object.entries(grouped).map(([estado, categories]) => {
+      let titleColor = '#2e7d32' // Green for Permitido
+      if (estado.toLowerCase().includes('prohibid')) {
+        titleColor = '#c62828' // Red for Prohibido
+      } else if (estado.toLowerCase().includes('condicionad')) {
+        titleColor = '#ef6c00' // Orange for Condicionado
+      } else if (estado !== 'Permitido') {
+        titleColor = '#455a64' // Grey for others
+
+      }
+
+      return (
+        <Box key={estado} sx={{ mb: 2 }}>
+          <Typography variant="subtitle2" sx={{ fontWeight: 'bold', color: titleColor, borderBottom: `1px solid ${titleColor}`, pb: 0.5, mb: 1 }}>
+            Actividades {estado}s
+          </Typography>
+          {Object.entries(categories).map(([categoria, items]) => (
+            <Box key={categoria} sx={{ mb: 1.5, pl: 1 }}>
+              <Typography variant="caption" sx={{ fontWeight: 'bold', display: 'block', color: '#555' }}>
+                {categoria}
+              </Typography>
+              <ul style={{ margin: '4px 0 0 0', paddingLeft: '20px', fontSize: '0.82rem', color: '#555' }}>
+                {items.map((item, idx) => (
+                  <li key={idx} style={{ marginBottom: '2px' }}>
+                    <strong>{item.actividad}</strong> {item.subcategoria !== item.actividad ? `(${item.subcategoria})` : ''}
+                  </li>
+                ))}
+              </ul>
+            </Box>
+          ))}
+        </Box>
+      )
+    })
   }
 
   return (
@@ -267,6 +318,73 @@ const BasicData = () => {
                 </Typography>
               </Box>
             ))}
+
+          {/* Régimen Urbanístico CPUA Section */}
+          {regimen && (
+            <Accordion sx={{ mt: 2, borderRadius: 2, '&:before': { display: 'none' }, border: '1px solid rgba(0,0,0,0.08)' }}>
+              <AccordionSummary expandIcon={<ExpandMoreIcon />} sx={{ backgroundColor: '#f9fafb', borderRadius: 2 }}>
+                <Typography variant="subtitle2" sx={{ ...decorators.bold, color: '#1a237e' }}>
+                  Régimen Urbanístico CPUA
+                </Typography>
+              </AccordionSummary>
+              <AccordionDetails sx={{ p: 1 }}>
+                <List size="small" disablePadding>
+                  {regimen.sub_distrito && (
+                    <ListItem divider><ListItemText primary="Sub Distrito" secondary={regimen.sub_distrito} /></ListItem>
+                  )}
+                  <ListItem divider><ListItemText primary="Superficie Mínima" secondary={regimen.sup_minima || 'N/A'} /></ListItem>
+                  <ListItem divider><ListItemText primary="Frente Mínimo" secondary={regimen.frente_min || 'N/A'} /></ListItem>
+                  <ListItem divider><ListItemText primary="F.O.T. Privado" secondary={regimen.fot_privado || 'N/A'} /></ListItem>
+                  <ListItem divider><ListItemText primary="F.O.T. Público" secondary={regimen.fot_publico || 'N/A'} /></ListItem>
+                  <ListItem divider><ListItemText primary="F.O.S. VU / VOMF / UC" secondary={`${regimen.fos_vu || 'N/A'} / ${regimen.fos_vomf || 'N/A'} / ${regimen.fos_uc || 'N/A'}`} /></ListItem>
+                  <ListItem divider><ListItemText primary="Retiros (Jardín / Fondo / Perfil)" secondary={`${regimen.r_jardin || 'N/A'} / ${regimen.r_fondo || 'N/A'} / ${regimen.r_perfil || 'N/A'}`} /></ListItem>
+                  <ListItem divider><ListItemText primary="Altura Máxima" secondary={regimen.altura_maxima || 'N/A'} /></ListItem>
+                  {regimen.plantas && (
+                    <ListItem divider><ListItemText primary="Plantas" secondary={regimen.plantas} /></ListItem>
+                  )}
+                  {regimen.fos && (
+                    <ListItem divider><ListItemText primary="F.O.S. General" secondary={regimen.fos} /></ListItem>
+                  )}
+                  <ListItem divider><ListItemText primary="Retiro de Frente / Lateral" secondary={`${regimen.r_frente || 'N/A'} / ${regimen.r_lateral || 'N/A'}`} /></ListItem>
+                  {regimen.r_fondo2 && (
+                    <ListItem divider><ListItemText primary="Retiro de Fondo 2" secondary={regimen.r_fondo2} /></ListItem>
+                  )}
+                  {regimen.r_desde_lm && (
+                    <ListItem divider><ListItemText primary="Retiro desde LM" secondary={regimen.r_desde_lm} /></ListItem>
+                  )}
+                  {regimen.altura_max && (
+                    <ListItem divider><ListItemText primary="Altura Máxima Alternativa" secondary={regimen.altura_max} /></ListItem>
+                  )}
+                  {regimen.fuente && (
+                    <ListItem divider><ListItemText primary="Fuente" secondary={regimen.fuente} /></ListItem>
+                  )}
+                  {regimen.referencia && (
+                    <ListItem>
+                      <ListItemText 
+                        primary="Referencia / Notas de CPUA" 
+                        secondary={regimen.referencia} 
+                        secondaryTypographyProps={{ style: { whiteSpace: 'pre-wrap', fontSize: '0.8rem', color: '#555' } }}
+                      />
+                    </ListItem>
+                  )}
+                </List>
+              </AccordionDetails>
+            </Accordion>
+          )}
+
+          {/* Actividades CPUA Section */}
+          {actividades && actividades.actividades && (
+            <Accordion sx={{ mt: 2, borderRadius: 2, '&:before': { display: 'none' }, border: '1px solid rgba(0,0,0,0.08)' }}>
+              <AccordionSummary expandIcon={<ExpandMoreIcon />} sx={{ backgroundColor: '#f9fafb', borderRadius: 2 }}>
+                <Typography variant="subtitle2" sx={{ ...decorators.bold, color: '#1a237e' }}>
+                  Actividades por Distrito CPUA
+                </Typography>
+              </AccordionSummary>
+              <AccordionDetails sx={{ p: 2 }}>
+                {renderActivitiesByState(actividades.actividades)}
+              </AccordionDetails>
+            </Accordion>
+          )}
         </Box>
       )}
       {!isSelected && <SelectParcel />}

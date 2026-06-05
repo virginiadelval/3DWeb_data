@@ -65,6 +65,7 @@ y += 15
       } else {
         x = nextlineX
         y += lineHeight
+        addPageIfNeeded()
         doc.text(word, x, y)
         x += widthWord + 1
       }
@@ -74,6 +75,7 @@ y += 15
       wordWithSpecials.split('\n').forEach((word, idx) => {
         if (idx > 0) {
           y += lineHeight
+          addPageIfNeeded()
           x = nextlineX
         }
         ;({ x, y } = writeWord(word))

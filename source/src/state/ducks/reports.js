@@ -190,21 +190,88 @@ const getData = createAsyncThunk(
       const barrio = info.barrio || phProps.ddesbarrio || 'No disponible'
       const distrito = info.distrito || 'No disponible'
 
-      // Fetch zoning info
+      // Fetch zoning and other WFS layers in parallel
       const zoningCql = `INTERSECTS(geom, POINT(${lng} ${lat}))`
       const zoningWfsUrl = `https://geocloud.municipalidadsalta.gob.ar/geoserver/ows?service=WFS&version=1.0.0&request=GetFeature&typeName=public:Zonificacion_CPUA2025_CGO_15102025&outputFormat=application/json&cql_filter=${encodeURIComponent(zoningCql)}`
+      const iiWfsUrl = `https://geocloud.municipalidadsalta.gob.ar/geoserver/ows?service=WFS&version=1.0.0&request=GetFeature&typeName=public:zonificacion_II&outputFormat=application/json&cql_filter=${encodeURIComponent(zoningCql)}`
+      const tgiWfsUrl = `https://geocloud.municipalidadsalta.gob.ar/geoserver/ows?service=WFS&version=1.0.0&request=GetFeature&typeName=public:zonificacion_TGI&outputFormat=application/json&cql_filter=${encodeURIComponent(zoningCql)}`
+      const comWfsUrl = `https://geocloud.municipalidadsalta.gob.ar/geoserver/ows?service=WFS&version=1.0.0&request=GetFeature&typeName=public:zonificacion_comercial&outputFormat=application/json&cql_filter=${encodeURIComponent(zoningCql)}`
+      const pracWfsUrl = `https://geocloud.municipalidadsalta.gob.ar/geoserver/ows?service=WFS&version=1.0.0&request=GetFeature&typeName=public:codigo_prac&outputFormat=application/json&cql_filter=${encodeURIComponent(zoningCql)}`
 
       let zoningProps = {}
+      let zona_ii = 'N/A'
+      let zona_tgi = 'N/A'
+      let zona_comer = 'N/A'
+      let inmueble_protegido = 'No'
+      let prac_categoria = 'N/A'
+      let prac_numero = 'N/A'
+      let prac_domicilio = 'N/A'
+      let prac_inmueble = 'N/A'
+      let prac_tipologia = 'N/A'
+      let prac_ficha = 'N/A'
+      let prac_instrumento = 'N/A'
+
       try {
-        const zoningRes = await fetch(zoningWfsUrl)
-        if (zoningRes.ok) {
-          const zoningData = await zoningRes.json()
-          if (zoningData && zoningData.features && zoningData.features.length > 0) {
-            zoningProps = zoningData.features[0].properties
-          }
+        const [zoningRes, iiRes, tgiRes, comRes, pracRes] = await Promise.all([
+          fetch(zoningWfsUrl).then(r => r.ok ? r.json() : null).catch(() => null),
+          fetch(iiWfsUrl).then(r => r.ok ? r.json() : null).catch(() => null),
+          fetch(tgiWfsUrl).then(r => r.ok ? r.json() : null).catch(() => null),
+          fetch(comWfsUrl).then(r => r.ok ? r.json() : null).catch(() => null),
+          fetch(pracWfsUrl).then(r => r.ok ? r.json() : null).catch(() => null)
+        ])
+
+        if (zoningRes && zoningRes.features && zoningRes.features.length > 0) {
+          zoningProps = zoningRes.features[0].properties
+        }
+        if (iiRes && iiRes.features && iiRes.features.length > 0) {
+          zona_ii = iiRes.features[0].properties.zonaII || 'N/A'
+        }
+        if (tgiRes && tgiRes.features && tgiRes.features.length > 0) {
+          zona_tgi = tgiRes.features[0].properties.zonaTGI || 'N/A'
+        }
+        if (comRes && comRes.features && comRes.features.length > 0) {
+          zona_comer = comRes.features[0].properties.ZONA_COMER || 'N/A'
+        }
+        if (pracRes && pracRes.features && pracRes.features.length > 0) {
+          inmueble_protegido = 'Si'
+          const props = pracRes.features[0].properties
+          prac_categoria = props.categoria || 'N/A'
+          prac_numero = props.numero !== undefined && props.numero !== null ? props.numero.toString() : 'N/A'
+          prac_domicilio = props.domicilio || 'N/A'
+          prac_inmueble = props.inmueble || 'N/A'
+          prac_tipologia = props.PRAC || 'N/A'
+          prac_ficha = props.ficha || 'N/A'
+          prac_instrumento = 'Decreto Nº 392/19'
         }
       } catch (err) {
-        console.error('Error fetching zoning information:', err)
+        console.error('Error fetching parallel WFS information for reports:', err)
+      }
+
+      const finalDistrito = distrito !== 'No disponible' ? distrito : (zoningProps.DISTRITO || 'N/A')
+
+      let dbRegimen = null
+      let dbActividades = null
+
+      if (finalDistrito && finalDistrito !== 'N/A' && finalDistrito !== 'No disponible') {
+        try {
+          const regUrl = `http://localhost:3001/api/regimen/${encodeURIComponent(finalDistrito.trim())}`
+          const regRes = await fetch(regUrl)
+          if (regRes.ok) {
+            dbRegimen = await regRes.json()
+          }
+        } catch (e) {
+          console.error('Error fetching local db regimen for reports:', e)
+        }
+
+        try {
+          const actUrl = `http://localhost:3001/api/actividades/${encodeURIComponent(finalDistrito.trim())}`
+          const actRes = await fetch(actUrl)
+          if (actRes.ok) {
+            dbActividades = await actRes.json()
+          }
+        } catch (e) {
+          console.error('Error fetching local db activities for reports:', e)
+        }
       }
 
       basicDataState = {
@@ -212,9 +279,11 @@ const getData = createAsyncThunk(
         direccion,
         barrio,
         comuna: 'Salta',
-        distrito: distrito !== 'No disponible' ? distrito : (zoningProps.DISTRITO || 'N/A'),
+        distrito: finalDistrito,
         latitud: lat,
         longitud: lng,
+        regimen: dbRegimen,
+        actividades: dbActividades,
 
         // Zoning fields
         zoning_distrito: zoningProps.DISTRITO || 'N/A',
@@ -227,6 +296,19 @@ const getData = createAsyncThunk(
         zoning_criterio: zoningProps.CRITERIO || 'N/A',
         zoning_area: zoningProps.AREA !== null && zoningProps.AREA !== undefined ? zoningProps.AREA : 'N/A',
         zoning_area2: zoningProps.AREA2 !== null && zoningProps.AREA2 !== undefined ? zoningProps.AREA2 : 'N/A',
+
+        // New WFS layers properties
+        zona_ii,
+        zona_tgi,
+        zona_comer,
+        inmueble_protegido,
+        prac_categoria,
+        prac_numero,
+        prac_domicilio,
+        prac_inmueble,
+        prac_tipologia,
+        prac_ficha,
+        prac_instrumento,
 
         // New owner properties (PH)
         owner_name: phProps.domape || 'N/A',
@@ -244,7 +326,6 @@ const getData = createAsyncThunk(
       direccion,
       barrio,
       comuna,
-      distrito,
       latitud,
       longitud,
       zoning_distrito,
@@ -256,49 +337,142 @@ const getData = createAsyncThunk(
       zoning_retiro_frente,
       zoning_criterio,
       zoning_area,
-      zoning_area2,
       owner_name,
       owner_document,
       owner_cuit,
       mvs_tipo,
       mvs_cod_link,
-      mvs_valor_rang
+      mvs_valor_rang,
+      zona_ii,
+      zona_tgi,
+      zona_comer,
+      inmueble_protegido,
+      prac_categoria,
+      prac_numero,
+      prac_domicilio,
+      prac_inmueble,
+      prac_tipologia,
+      prac_ficha,
+      prac_instrumento,
+      regimen,
+      actividades
     } = basicDataState
 
     const decodedLink = decodeCodLink(mvs_cod_link)
 
+    const generalInfoList = [
+      {
+        name: 'Dirección',
+        value: direccion ?? ''
+      },
+      {
+        name: 'Nomenclatura Catastral',
+        value: smp ?? ''
+      },
+      {
+        name: 'Tipo de Catastro',
+        value: mvs_tipo ?? 'N/A'
+      },
+      {
+        name: 'Inmueble protegido',
+        value: inmueble_protegido ?? 'No'
+      }
+    ]
+
+    if (inmueble_protegido === 'Si') {
+      generalInfoList.push(
+        {
+          name: 'Categoría',
+          value: prac_categoria ?? 'N/A'
+        },
+        {
+          name: 'Número',
+          value: prac_numero ?? 'N/A'
+        },
+        {
+          name: 'Domicilio',
+          value: prac_domicilio ?? 'N/A'
+        },
+        {
+          name: 'Número calle',
+          value: prac_inmueble ?? 'N/A'
+        },
+        {
+          name: 'Tipología',
+          value: prac_tipologia ?? 'N/A'
+        },
+        {
+          name: 'Ficha',
+          value: prac_ficha ?? 'N/A'
+        },
+        {
+          name: 'Instrumento legal',
+          value: prac_instrumento ?? 'Decreto Nº 392/19'
+        }
+      )
+    }
+
+    generalInfoList.push(
+      {
+        name: 'Barrio',
+        value: barrio ?? ''
+      },
+      {
+        name: 'Municipio',
+        value: comuna ?? 'Salta'
+      },
+      {
+        name: 'Latitud',
+        value: latitud ? latitud.toString() : ''
+      },
+      {
+        name: 'Longitud',
+        value: longitud ? longitud.toString() : ''
+      }
+    )
+
+    const activitiesDataList = []
+    if (actividades && actividades.actividades && actividades.actividades.length > 0) {
+      const listByState = {}
+      actividades.actividades.forEach(act => {
+        const est = act.estado || 'Otros'
+        if (!listByState[est]) {
+          listByState[est] = {}
+        }
+        const cat = act.categoria || 'Sin Categoría'
+        if (!listByState[est][cat]) {
+          listByState[est][cat] = []
+        }
+        listByState[est][cat].push(`* ${act.actividad} (${act.subcategoria})`)
+      })
+
+      Object.keys(listByState).forEach(estadoGroup => {
+        activitiesDataList.push({
+          name: `--- Actividades con Estado: ${estadoGroup} ---`,
+          value: ''
+        })
+        Object.keys(listByState[estadoGroup]).forEach(catGroup => {
+          activitiesDataList.push({
+            name: catGroup,
+            value: listByState[estadoGroup][catGroup]
+          })
+        })
+      })
+    } else {
+      activitiesDataList.push({
+        name: 'Información',
+        value: 'No disponible'
+      })
+    }
+
     const sections = [
       {
         title: 'Información General',
+        dataList: generalInfoList
+      },
+      {
+        title: 'Información Dominial',
         dataList: [
-          {
-            name: 'Dirección',
-            value: direccion ?? ''
-          },
-          {
-            name: 'Nomenclatura Catastral',
-            value: smp ?? ''
-          },
-          {
-            name: 'Barrio',
-            value: barrio ?? ''
-          },
-          {
-            name: 'Municipio',
-            value: comuna ?? 'Salta'
-          },
-          {
-            name: 'Distrito Catastral',
-            value: distrito ?? ''
-          },
-          {
-            name: 'Latitud',
-            value: latitud ? latitud.toString() : ''
-          },
-          {
-            name: 'Longitud',
-            value: longitud ? longitud.toString() : ''
-          },
           {
             name: 'Propietario (PH)',
             value: owner_name ?? 'N/A'
@@ -314,61 +488,8 @@ const getData = createAsyncThunk(
         ]
       },
       {
-        title: 'Zonificación de Usos del Suelo',
+        title: 'Servicios',
         dataList: [
-          {
-            name: 'Distrito CPUA',
-            value: zoning_distrito ?? 'N/A'
-          },
-          {
-            name: 'F.O.S. (Factor de Ocupación del Suelo)',
-            value: zoning_fos ? zoning_fos.toString() : 'N/A'
-          },
-          {
-            name: 'F.O.T. Privado',
-            value: zoning_fot_privado ? zoning_fot_privado.toString() : 'N/A'
-          },
-          {
-            name: 'F.O.T. Público',
-            value: zoning_fot_publico ? zoning_fot_publico.toString() : 'N/A'
-          },
-          {
-            name: 'Altura Máxima',
-            value: zoning_altura_m ? `${zoning_altura_m.toString()} m` : 'N/A'
-          },
-          {
-            name: 'Retiro de Fondo',
-            value: zoning_retiro_fondo ? zoning_retiro_fondo.toString() : 'N/A'
-          },
-          {
-            name: 'Retiro de Frente',
-            value: zoning_retiro_frente ? zoning_retiro_frente.toString() : 'N/A'
-          },
-          {
-            name: 'Criterio',
-            value: zoning_criterio ?? 'N/A'
-          },
-          {
-            name: 'Área',
-            value: zoning_area ? zoning_area.toString() : 'N/A'
-          },
-          {
-            name: 'Área 2',
-            value: zoning_area2 ? zoning_area2.toString() : 'N/A'
-          }
-        ]
-      },
-      {
-        title: 'Más Valor Suelo',
-        dataList: [
-          {
-            name: 'Tipo de Catastro',
-            value: mvs_tipo ?? 'N/A'
-          },
-          {
-            name: 'Rango de Valor del Suelo',
-            value: mvs_valor_rang ?? 'N/A'
-          },
           {
             name: 'Tipo de material de Calles',
             value: decodedLink.mvs_calle
@@ -398,6 +519,105 @@ const getData = createAsyncThunk(
             value: decodedLink.mvs_semaforo
           }
         ]
+      },
+      {
+        title: 'Categoria Impuesto Inmobiliario',
+        dataList: [
+          {
+            name: 'Tasa General de Inmueble',
+            value: zona_tgi ?? 'N/A'
+          },
+          {
+            name: 'Inmpuesto Inmobilidaio',
+            value: zona_ii ?? 'N/A'
+          },
+          {
+            name: 'Zonificación Comercial ',
+            value: zona_comer ?? 'N/A'
+          }
+        ]
+      },
+      {
+        title: 'Más Valor Suelo',
+        dataList: [
+          {
+            name: 'Rango de Valor del Suelo',
+            value: mvs_valor_rang ?? 'N/A'
+          }
+        ]
+      },
+      {
+        title: 'Zonificación de Usos del Suelo',
+        dataList: [
+          {
+            name: 'Distrito CPUA',
+            value: zoning_distrito ?? 'N/A'
+          },
+          {
+            name: 'F.O.S. (Factor de Ocupación del Suelo)',
+            value: zoning_fos ? zoning_fos.toString() : 'N/A'
+          },
+          {
+            name: 'F.O.T.Privado',
+            value: zoning_fot_privado ? zoning_fot_privado.toString() : 'N/A'
+          },
+          {
+            name: 'F.O.T.Público',
+            value: zoning_fot_publico ? zoning_fot_publico.toString() : 'N/A'
+          },
+          {
+            name: 'Altura Máxima',
+            value: zoning_altura_m ? (zoning_altura_m === 'N/A' ? 'N/A m' : `${zoning_altura_m.toString()} m`) : 'N/A m'
+          },
+          {
+            name: 'Retiro de Fondo',
+            value: zoning_retiro_fondo ? zoning_retiro_fondo.toString() : 'N/A'
+          },
+          {
+            name: 'Retiro de Frente',
+            value: zoning_retiro_frente ? zoning_retiro_frente.toString() : 'N/A'
+          },
+          {
+            name: 'Criterio',
+            value: zoning_criterio ?? 'N/A'
+          },
+          {
+            name: 'Área',
+            value: zoning_area ? zoning_area.toString() : 'N/A'
+          }
+        ]
+      },
+      {
+        title: 'Régimen Urbanístico (Base de Datos)',
+        dataList: regimen ? [
+          { name: 'Sub Distrito', value: regimen.sub_distrito ?? 'N/A' },
+          { name: 'Superficie Mínima', value: regimen.sup_minima ?? 'N/A' },
+          { name: 'Frente Mínimo', value: regimen.frente_min ?? 'N/A' },
+          { name: 'F.O.T. Privado', value: regimen.fot_privado ?? 'N/A' },
+          { name: 'F.O.T. Público', value: regimen.fot_publico ?? 'N/A' },
+          { name: 'F.O.S. VU', value: regimen.fos_vu ?? 'N/A' },
+          { name: 'F.O.S. VOMF', value: regimen.fos_vomf ?? 'N/A' },
+          { name: 'F.O.S. UC', value: regimen.fos_uc ?? 'N/A' },
+          { name: 'Retiro de Jardín', value: regimen.r_jardin ?? 'N/A' },
+          { name: 'Retiro de Fondo', value: regimen.r_fondo ?? 'N/A' },
+          { name: 'Retiro de Perfil', value: regimen.r_perfil ?? 'N/A' },
+          { name: 'Altura Máxima', value: regimen.altura_maxima ?? 'N/A' },
+          { name: 'Plantas', value: regimen.plantas ?? 'N/A' },
+          { name: 'F.O.S.', value: regimen.fos ?? 'N/A' },
+          { name: 'Retiro de Frente', value: regimen.r_frente ?? 'N/A' },
+          { name: 'Retiro Lateral', value: regimen.r_lateral ?? 'N/A' },
+          { name: 'Retiro de Fondo 2', value: regimen.r_fondo2 ?? 'N/A' },
+          { name: 'Retiro desde LM', value: regimen.r_desde_lm ?? 'N/A' },
+          { name: 'Altura Máxima 2', value: regimen.altura_max ?? 'N/A' },
+          { name: 'Fuente', value: regimen.fuente ?? 'N/A' },
+          { name: 'Referencia', value: regimen.referencia ?? 'N/A' }
+        ] : [
+          { name: 'Información', value: 'No disponible' }
+        ]
+      },
+      {
+        title: 'Actividades del Suelo (Base de Datos)',
+        dataList: activitiesDataList
       }
     ]
 

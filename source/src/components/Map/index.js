@@ -144,7 +144,8 @@ const Map = ({ children }) => {
       const layers = [
         'baseLayer_principal',
         'baseLayer_secundario',
-        'baseLayer_argenmap'
+        'baseLayer_argenmap',
+        'baseLayer_gris'
       ]
       layers.forEach((layerId) => {
         if (map.getLayer(layerId)) {
@@ -336,6 +337,18 @@ const Map = ({ children }) => {
             style={{
               border:
                 activeBaseLayer === 'baseLayer_argenmap'
+                  ? '3px solid #1a73e8'
+                  : '2px solid #fff'
+            }}
+          />
+          <MinimapOption
+            imageUrl={`url(${imgCapaBasePrincipal})`}
+            onClick={() => setActiveBaseLayer('baseLayer_gris')}
+            text="OSM GRIS"
+            style={{
+              filter: 'grayscale(100%)',
+              border:
+                activeBaseLayer === 'baseLayer_gris'
                   ? '3px solid #1a73e8'
                   : '2px solid #fff'
             }}

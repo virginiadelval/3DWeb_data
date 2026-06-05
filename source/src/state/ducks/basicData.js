@@ -55,31 +55,31 @@ const decodeCodLink = (codLink) => {
 
   const mapping = {
     calle: {
-      '10': 'Asfalto/Hormigón <br>Bituminoso/Adoquín',
-      '11': 'Tierra con Cordón Cuneta',
-      '12': 'Tierra sin Cordón Cuneta / Sin Dato'
+      '10': 'Calle con Asfalto, Hormigón, Bituminoso ó Adoquín',
+      '11': 'Calle de Tierra con Cordón Cuneta',
+      '12': 'Calle de Tierra sin Cordón Cuneta o Sin Dato'
     },
     recol: {
       '20': 'Especial (centro/gastronómico)',
       '21': 'Servicio matutino y nocturno',
       '22': 'Contenedores (6 barrios)',
-      '23': 'Sin servicio'
+      '23': 'Sin servicio de recolección'
     },
     barrido: {
       '30': 'Especial (centro/gastronómico)',
       '31': '6 veces por semana',
       '32': '3 veces por semana',
       '33': '1–2 veces por semana',
-      '34': 'Sin servicio'
+      '34': 'Sin servicio de barrido'
     },
     lusal: {
-      '40': 'Lámpara LED',
-      '41': 'Otro tipo de lámpara',
-      '42': 'Sin servicio'
+      '40': 'Alumbrado con lámpara tipo LED',
+      '41': 'Alumbrado con lámpara distinta de LED',
+      '42': 'Sin servicio de alumbrado público'
     },
     ev: {
-      '50': 'Con servicio',
-      '51': 'Sin servicio'
+      '50': 'Con servicio en Espacios Verdes',
+      '51': 'No hay Espacios Verdes en cerania'
     },
     semaforo: {
       '60': 'Con semáforo',
@@ -238,21 +238,88 @@ const getData = async ({ coord, smp }) => {
   const barrio = info.barrio || phProps.ddesbarrio || 'No disponible'
   const distrito = info.distrito || 'No disponible'
 
-  // Fetch zoning info
+  // Fetch zoning and other WFS layers in parallel
   const zoningCql = `INTERSECTS(geom, POINT(${lng} ${lat}))`
   const zoningWfsUrl = `https://geocloud.municipalidadsalta.gob.ar/geoserver/ows?service=WFS&version=1.0.0&request=GetFeature&typeName=public:Zonificacion_CPUA2025_CGO_15102025&outputFormat=application/json&cql_filter=${encodeURIComponent(zoningCql)}`
+  const iiWfsUrl = `https://geocloud.municipalidadsalta.gob.ar/geoserver/ows?service=WFS&version=1.0.0&request=GetFeature&typeName=public:zonificacion_II&outputFormat=application/json&cql_filter=${encodeURIComponent(zoningCql)}`
+  const tgiWfsUrl = `https://geocloud.municipalidadsalta.gob.ar/geoserver/ows?service=WFS&version=1.0.0&request=GetFeature&typeName=public:zonificacion_TGI&outputFormat=application/json&cql_filter=${encodeURIComponent(zoningCql)}`
+  const comWfsUrl = `https://geocloud.municipalidadsalta.gob.ar/geoserver/ows?service=WFS&version=1.0.0&request=GetFeature&typeName=public:zonificacion_comercial&outputFormat=application/json&cql_filter=${encodeURIComponent(zoningCql)}`
+  const pracWfsUrl = `https://geocloud.municipalidadsalta.gob.ar/geoserver/ows?service=WFS&version=1.0.0&request=GetFeature&typeName=public:codigo_prac&outputFormat=application/json&cql_filter=${encodeURIComponent(zoningCql)}`
 
   let zoningProps = {}
+  let zona_ii = 'N/A'
+  let zona_tgi = 'N/A'
+  let zona_comer = 'N/A'
+  let inmueble_protegido = 'No'
+  let prac_categoria = 'N/A'
+  let prac_numero = 'N/A'
+  let prac_domicilio = 'N/A'
+  let prac_inmueble = 'N/A'
+  let prac_tipologia = 'N/A'
+  let prac_ficha = 'N/A'
+  let prac_instrumento = 'N/A'
+
   try {
-    const zoningRes = await fetch(zoningWfsUrl)
-    if (zoningRes.ok) {
-      const zoningData = await zoningRes.json()
-      if (zoningData && zoningData.features && zoningData.features.length > 0) {
-        zoningProps = zoningData.features[0].properties
-      }
+    const [zoningRes, iiRes, tgiRes, comRes, pracRes] = await Promise.all([
+      fetch(zoningWfsUrl).then(r => r.ok ? r.json() : null).catch(() => null),
+      fetch(iiWfsUrl).then(r => r.ok ? r.json() : null).catch(() => null),
+      fetch(tgiWfsUrl).then(r => r.ok ? r.json() : null).catch(() => null),
+      fetch(comWfsUrl).then(r => r.ok ? r.json() : null).catch(() => null),
+      fetch(pracWfsUrl).then(r => r.ok ? r.json() : null).catch(() => null)
+    ])
+
+    if (zoningRes && zoningRes.features && zoningRes.features.length > 0) {
+      zoningProps = zoningRes.features[0].properties
+    }
+    if (iiRes && iiRes.features && iiRes.features.length > 0) {
+      zona_ii = iiRes.features[0].properties.zonaII || 'N/A'
+    }
+    if (tgiRes && tgiRes.features && tgiRes.features.length > 0) {
+      zona_tgi = tgiRes.features[0].properties.zonaTGI || 'N/A'
+    }
+    if (comRes && comRes.features && comRes.features.length > 0) {
+      zona_comer = comRes.features[0].properties.ZONA_COMER || 'N/A'
+    }
+    if (pracRes && pracRes.features && pracRes.features.length > 0) {
+      inmueble_protegido = 'Si'
+      const props = pracRes.features[0].properties
+      prac_categoria = props.categoria || 'N/A'
+      prac_numero = props.numero !== undefined && props.numero !== null ? props.numero.toString() : 'N/A'
+      prac_domicilio = props.domicilio || 'N/A'
+      prac_inmueble = props.inmueble || 'N/A'
+      prac_tipologia = props.PRAC || 'N/A'
+      prac_ficha = props.ficha || 'N/A'
+      prac_instrumento = 'Decreto Nº 392/19'
     }
   } catch (err) {
-    console.error('Error fetching zoning information:', err)
+    console.error('Error fetching parallel WFS information:', err)
+  }
+
+  const finalDistrito = distrito !== 'No disponible' ? distrito : (zoningProps.DISTRITO || 'N/A')
+
+  let dbRegimen = null
+  let dbActividades = null
+
+  if (finalDistrito && finalDistrito !== 'N/A' && finalDistrito !== 'No disponible') {
+    try {
+      const regUrl = `http://localhost:3001/api/regimen/${encodeURIComponent(finalDistrito.trim())}`
+      const regRes = await fetch(regUrl)
+      if (regRes.ok) {
+        dbRegimen = await regRes.json()
+      }
+    } catch (e) {
+      console.error('Error fetching local db regimen:', e)
+    }
+
+    try {
+      const actUrl = `http://localhost:3001/api/actividades/${encodeURIComponent(finalDistrito.trim())}`
+      const actRes = await fetch(actUrl)
+      if (actRes.ok) {
+        dbActividades = await actRes.json()
+      }
+    } catch (e) {
+      console.error('Error fetching local db activities:', e)
+    }
   }
 
   return {
@@ -260,12 +327,14 @@ const getData = async ({ coord, smp }) => {
     direccion,
     barrio,
     comuna: 'Salta',
-    distrito: distrito !== 'No disponible' ? distrito : (zoningProps.DISTRITO || 'N/A'),
+    distrito: finalDistrito,
     latitud: lat,
     longitud: lng,
     centroide: [lng, lat],
     photoData: [],
     constitucionEstadoParcelario: null,
+    regimen: dbRegimen,
+    actividades: dbActividades,
 
     // Zoning fields
     zoning_distrito: zoningProps.DISTRITO || 'N/A',
@@ -278,6 +347,19 @@ const getData = async ({ coord, smp }) => {
     zoning_criterio: zoningProps.CRITERIO || 'N/A',
     zoning_area: zoningProps.AREA !== null && zoningProps.AREA !== undefined ? zoningProps.AREA : 'N/A',
     zoning_area2: zoningProps.AREA2 !== null && zoningProps.AREA2 !== undefined ? zoningProps.AREA2 : 'N/A',
+
+    // New WFS layers properties
+    zona_ii,
+    zona_tgi,
+    zona_comer,
+    inmueble_protegido,
+    prac_categoria,
+    prac_numero,
+    prac_domicilio,
+    prac_inmueble,
+    prac_tipologia,
+    prac_ficha,
+    prac_instrumento,
 
     // New owner properties (PH)
     owner_name: phProps.domape || 'N/A',

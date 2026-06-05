@@ -37,7 +37,7 @@ export default function App({ isAuthenticated }) {
 
   return (
     <>
-      <BrowserRouter>
+      <BrowserRouter basename={process.env.PUBLIC_URL}>
         <Routes authed={isAuthenticated} />
       </BrowserRouter>
       <Tour

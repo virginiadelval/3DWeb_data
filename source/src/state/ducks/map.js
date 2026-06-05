@@ -229,7 +229,8 @@ const loadLayers = createAsyncThunk('map/loadLayers', async () => {
   const baseLayers = getBaseLayers()
   let wmsLayers = []
   try {
-    wmsLayers = await fetch('./wmsConfig.json').then((res) => res.json())
+    const wmsUrl = `${process.env.PUBLIC_URL || ''}/wmsConfig.json`.replace(/\/+/g, '/')
+    wmsLayers = await fetch(wmsUrl).then((res) => res.json())
   } catch (err) {
     console.error('Error fetching wmsConfig.json:', err)
   }
@@ -244,9 +245,12 @@ const loadLayers = createAsyncThunk('map/loadLayers', async () => {
 
 const initMap = createAsyncThunk(
   'map/initMap',
-  async (mapInstance) => {
+  async (mapInstance, { getState }) => {
     mapGL = mapInstance
-    const mapOnLoad = mapOnPromise(mapInstance.map)('load')
+    const state = getState()
+    const mapOnLoad = mapInstance.map.loaded()
+      ? Promise.resolve()
+      : mapOnPromise(mapInstance.map)('load')
     const imagesToLoad = getImagesToLoad().map(({ id, data }) => ({
       id,
       data
@@ -258,6 +262,24 @@ const initMap = createAsyncThunk(
       .then(() =>
         imagesToMerge.forEach((images) => mergeImages(mapGL.map, images))
       )
+      .then(() => {
+        // Load default visible WMS layers
+        const { wmsLayers } = state.map
+        if (wmsLayers && wmsLayers.length > 0) {
+          wmsLayers.forEach((layer) => {
+            if (layer.visible) {
+              addWMSLayer(mapGL.map, { ...layer, visible: true })
+            }
+          })
+          // Reorder visible WMS layers to match the configured order
+          for (let i = wmsLayers.length - 1; i >= 0; i--) {
+            const layer = wmsLayers[i]
+            if (layer.visible && mapGL.map.getLayer(layer.id)) {
+              mapGL.map.moveLayer(layer.id)
+            }
+          }
+        }
+      })
       .then(() => true)
       .catch(() => false)
   },

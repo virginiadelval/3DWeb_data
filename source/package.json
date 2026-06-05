@@ -2,6 +2,7 @@
   "name": "cur3d",
   "version": "0.3.0",
   "private": true,
+  "homepage": "https://virginiadelval.github.io/WebSalta3D",
   "dependencies": {
     "@emotion/react": "^11.10.5",
     "@emotion/styled": "^11.10.5",
@@ -44,7 +45,7 @@
   },
   "scripts": {
     "start": "env-cmd -f .env react-scripts --openssl-legacy-provider start",
-    "build": "GENERATE_SOURCEMAP=true env-cmd -f .env react-scripts build",
+    "build": "env-cmd -f .env react-scripts --openssl-legacy-provider build",
     "lint": "eslint src/",
     "lint:fix": "eslint src/ --fix",
     "format": "prettier --write \"./**/*.{js,jsx,css,scss,md}\" --ignore-pattern node_modules/",

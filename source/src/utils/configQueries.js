@@ -1,13 +1,21 @@
 import icons from 'utils/svgIcons'
 
 let config = null
+const getAbsoluteUrl = (url) => {
+  if (url.startsWith('http') || url.startsWith('/')) {
+    return url
+  }
+  const publicUrl = process.env.PUBLIC_URL || ''
+  return `${publicUrl}/${url}`.replace(/\/+/g, '/')
+}
+
 const loadAppConfig = async () => {
   if (config !== null) {
     return
   }
   const configEnviroment = window.configs
   const { urlConfigBase, urlLayers, includes, replaces } = configEnviroment
-  let configBaseText = await fetch(urlConfigBase).then((data) => data.text())
+  let configBaseText = await fetch(getAbsoluteUrl(urlConfigBase)).then((data) => data.text())
 
   replaces.forEach(({ key, value }) => {
     configBaseText = configBaseText.replace(new RegExp(key, 'g'), value)
@@ -15,7 +23,7 @@ const loadAppConfig = async () => {
 
   const configBase = JSON.parse(configBaseText)
 
-  const configLayers = await fetch(urlLayers).then((data) => data.json())
+  const configLayers = await fetch(getAbsoluteUrl(urlLayers)).then((data) => data.json())
 
   const layersGroup = groupLayersByCategory(
     configLayers.visibilidad.cur3d.mbtiles

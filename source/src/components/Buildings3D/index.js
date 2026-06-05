@@ -23,8 +23,8 @@ import debounce from 'lodash.debounce'
 import MapaInteractivoGL from 'utils/MapaInteractivoGL'
 import styles from './styles'
 
-const FIXED_BUILDING_COLOR = '#cbd5e1' // Modern sleek gray
-const ACCENT_COLOR = '#004174' // Deep corporate blue
+const FIXED_BUILDING_COLOR = '#828385' // Modern sleek gray
+const ACCENT_COLOR = '#022A47' // Deep corporate blue
 
 const Buildings3D = () => {
   const isMapReady = useSelector((state) => state.map.isMapReady)

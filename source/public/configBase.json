@@ -2450,6 +2450,17 @@
           "visibility": "none"
         },
         "paint": {}
+      },
+      {
+        "id": "baseLayer_gris",
+        "type": "raster",
+        "source": "capabase_1",
+        "layout": {
+          "visibility": "none"
+        },
+        "paint": {
+          "raster-saturation": -1
+        }
       }
     ],
     "light": {
@@ -2477,7 +2488,7 @@
       "source-layer": "default",
       "type": "fill-extrusion",
       "paint": {
-        "fill-extrusion-color": "#fdd306",
+        "fill-extrusion-color": "#05C9FA",
         "fill-extrusion-opacity": 0.9,
         "fill-extrusion-height": [
           "get",
@@ -2494,8 +2505,8 @@
       "type": "fill",
       "layout": {},
       "paint": {
-        "fill-color": "khaki",
-        "fill-outline-color": "khaki",
+        "fill-color": "#05C9FA",
+        "fill-outline-color": "#05C9FA",
         "fill-opacity": 0.5
       }
     }

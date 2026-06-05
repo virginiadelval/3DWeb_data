@@ -36,6 +36,9 @@ export const addWMSLayer = (map, config) => {
   const layerId = config.id;
 
   if (map.getSource(sourceId)) {
+    if (map.getLayer(layerId)) {
+      map.setLayoutProperty(layerId, 'visibility', config.visible ? 'visible' : 'none');
+    }
     return;
   }
 

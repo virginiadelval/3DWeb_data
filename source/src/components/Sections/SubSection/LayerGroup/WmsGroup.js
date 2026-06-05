@@ -277,7 +277,7 @@ const WmsItem = ({ id, name, visible, opacity, url, layers, isFirst, isLast }) =
     </Box>
   )
 }
-
+/// Categorias estilizar 
 const CATEGORIES = [
   {
     title: 'Barrios',
@@ -287,33 +287,31 @@ const CATEGORIES = [
     title: 'Espacios verdes',
     ids: ['wms_espacios_verdes']
   },
+  // {
+  //   title: 'Oficinas Municipales',
+  //   ids: ['wms_oficinas_municipales']
+  // },
+  // {
+  //   title: 'CIC',
+  //   ids: ['wms_cic']
+  // },
   {
-    title: 'Oficinas Municipales',
-    ids: ['wms_oficinas_municipales']
-  },
-  {
-    title: 'CIC',
-    ids: ['wms_cic']
-  },
-  {
-    title: 'CPUA',
+    title: 'Código de Planeamiento Urbano Ambiental (CPUA)',
     ids: [
       'wms_ejido',
       'wms_puc',
       'wms_catastros',
       'wms_manzanas',
       'wms_zonificacion',
+      'wms_codigo_prac',
       'wms_convenio_ordenanza',
       'wms_piu',
       'wms_ius',
-      'wms_red_vial',
-      'wms_codigo_prac'
+      'wms_red_vial'
+      
     ]
   },
-  {
-    title: 'Control Ciudadano',
-    ids: ['wms_carteleria', 'wms_reclamos', 'wms_mico_macocentro']
-  },
+ 
   {
     title: 'Zonificación Tributaria',
     ids: [
@@ -322,18 +320,22 @@ const CATEGORIES = [
       'wms_zonificacion_comercial'
     ]
   },
-  {
-    title: 'Servicios',
-    ids: ['wms_luminarias', 'wms_barrios_limpieza']
+   {
+    title: 'Control Ciudadano',
+    ids: ['wms_carteleria', 'wms_reclamos', 'wms_mico_macocentro']
   },
-  {
-    title: 'Estacionamiento Medido',
-    ids: [
-      'wms_estacionamiento_medido',
-      'wms_estacionamiento_prohibido',
-      'wms_estacionamiento_libre'
-    ]
-  }
+  // {
+  //   title: 'Servicios',
+  //   ids: ['wms_luminarias', 'wms_barrios_limpieza']
+  // },
+  // {
+  //   title: 'Estacionamiento Medido',
+  //   ids: [
+  //     'wms_estacionamiento_medido',
+  //     'wms_estacionamiento_prohibido',
+  //     'wms_estacionamiento_libre'
+  //   ]
+  // }
 ]
 
 const WmsGroup = () => {
@@ -372,7 +374,8 @@ const WmsGroup = () => {
           key={cat.title}
           sx={styles.accordion}
           disableGutters
-          defaultExpanded={cat.title === 'CPUA'}
+            // Abre por defecto solo si coincide con el título de CPUA
+  defaultExpanded={cat.title === 'Código de Planeamiento Urbano Ambiental (CPUA)'}
         >
           <AccordionSummary
             expandIcon={<ExpandMoreIcon sx={{ fontSize: 18 }} />}

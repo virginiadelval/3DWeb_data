@@ -7,7 +7,7 @@
     "format": "image/png",
     "transparent": true,
     "version": "1.1.1",
-    "visible": true,
+    "visible": false,
     "opacity": 0.5,
     "getFeatureInfo": true,
     "boundingBox": [[-65.50, -24.89], [-65.34, -24.70]]
@@ -20,7 +20,7 @@
     "format": "image/png",
     "transparent": true,
     "version": "1.1.1",
-    "visible": true,
+    "visible": false,
     "opacity": 0.6,
     "getFeatureInfo": true,
     "boundingBox": [[-65.50, -24.89], [-65.34, -24.70]]
@@ -72,7 +72,7 @@
     "format": "image/png",
     "transparent": true,
     "version": "1.1.1",
-    "visible": true,
+    "visible": false,
     "opacity": 0.6,
     "getFeatureInfo": true,
     "boundingBox": [[-65.50, -24.89], [-65.34, -24.70]]
@@ -124,7 +124,7 @@
     "format": "image/png",
     "transparent": true,
     "version": "1.1.1",
-    "visible": false,
+    "visible": true,
     "opacity": 0.7,
     "getFeatureInfo": true,
     "boundingBox": [[-65.50, -24.89], [-65.34, -24.70]]
