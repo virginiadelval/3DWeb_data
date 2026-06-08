@@ -20,6 +20,7 @@ import LinksNormatives from 'components/Sections/SubSection/Normative/LinksNorma
 import PlusvaliaRights from 'components/Sections/SubSection/PlusvaliaRights'
 import IFC from './SubSection/IFC'
 import Patrimony from './SubSection/Patrimony'
+import CadastreSearch from 'components/Sections/SubSection/CadastreSearch'
 
 const Section = () => {
   const isShow = useSelector((state) => state.categories.sectionOpen)
@@ -38,6 +39,7 @@ const Section = () => {
     ['Contact', Contact],
     ['Buildable', Buildable],
     ['BasicData', BasicData],
+    ['CadastreSearch', CadastreSearch],
     ['Uses', Uses],
     ['Works', Works],
     ['Affectations', Affectations],

@@ -1031,6 +1031,12 @@
   ],
   "information": [
     {
+      "id": "CadastreSearch",
+      "title": "Consulta de Catastro",
+      "color": "#1976d2",
+      "info": "Permite realizar búsquedas catastrales por número de catastro o número de cuenta."
+    },
+    {
       "id": "BasicData",
       "title": "Datos Básicos",
       "color": "#34485e",

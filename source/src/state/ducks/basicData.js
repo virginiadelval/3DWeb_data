@@ -412,9 +412,37 @@ const selectedParcel = createAsyncThunk(
 
 const seekerParcel = createAsyncThunk(
   'basicData/seekerParcel',
-  async (smp, { dispatch, getState }) => {
-    if (smp !== null && smp !== undefined) {
-      const data = await getData({ smp })
+  async (payload, { dispatch, getState }) => {
+    let value = payload
+    let type = 'catastro'
+    if (payload && typeof payload === 'object') {
+      value = payload.value
+      type = payload.type
+    }
+
+    if (value !== null && value !== undefined) {
+      let catastro = value
+      if (type === 'cuenta') {
+        const cql = `cuenta = ${value} OR cuenta = '${value}'`
+        const url = `https://geocloud.municipalidadsalta.gob.ar/geoserver/ows?service=WFS&version=1.0.0&request=GetFeature&typeName=private:0y1_codigolink_masvalorsuelo_ut_v1&outputFormat=application/json&cql_filter=${encodeURIComponent(cql)}`
+        try {
+          const res = await fetch(url)
+          if (res.ok) {
+            const dataJson = await res.json()
+            if (dataJson && dataJson.features && dataJson.features.length > 0) {
+              catastro = dataJson.features[0].properties.catastro
+            } else {
+              throw new Error('Número de cuenta no encontrado.')
+            }
+          } else {
+            throw new Error('Error al consultar el número de cuenta.')
+          }
+        } catch (err) {
+          throw new Error(err.message || 'Error en la conexión al buscar la cuenta.')
+        }
+      }
+
+      const data = await getData({ smp: catastro })
       !getState().IFC.IFCModelBlob &&
         dispatch(setModelCoordinates(data.centroide))
       cameraUpdated(data, dispatch)
