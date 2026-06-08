@@ -64,6 +64,52 @@ const BasicData = () => {
   const isSelected = useSelector((state) => state.basicData.isSelected)
   const { photoData, regimen, actividades } = data
 
+  const allBasicData = getBasicData()
+  const serviciosFills = ['mvs_calle', 'mvs_af_header', 'mvs_recol', 'mvs_barrido', 'mvs_lusal', 'mvs_ev', 'mvs_semaforo']
+  const propiedadFills = ['owner_name', 'owner_document', 'owner_cuit']
+  const deletedFills = ['distrito', 'zoning_distrito', 'zoning_fos', 'zoning_fot_privado', 'zoning_fot_publico', 'zoning_altura_m', 'zoning_retiro_fondo', 'zoning_retiro_frente', 'zoning_criterio', 'zoning_area', 'mvs_valor_rang']
+
+  const generalData = allBasicData.filter(item => 
+    !serviciosFills.includes(item.fill) && 
+    !propiedadFills.includes(item.fill) && 
+    !deletedFills.includes(item.fill)
+  )
+  const serviciosData = allBasicData.filter(item => serviciosFills.includes(item.fill))
+  const propiedadData = allBasicData.filter(item => propiedadFills.includes(item.fill))
+
+  const renderDetailsItems = (items) => {
+    return items.map(({ title, fill, format, isNumber }) => {
+      const fills = fill.split(',')
+      const value = []
+
+      const valueFill =
+        fill === 'superficie_parcela'
+          ? superficieParcela?.toString()
+          : data[fills[0]]
+      if (valueFill !== undefined && valueFill !== null && valueFill !== '') {
+        value.push(
+          isNumber
+            ? Number.parseFloat(valueFill).toLocaleString('es-AR')
+            : valueFill
+        )
+      }
+      if (format === 'url' && linkImagen) {
+        value.push(linkImagen[fills[0]])
+        value.push(...fills)
+      }
+      return (
+        <Details
+          key={title}
+          styles={styles}
+          decorators={decorators}
+          title={title}
+          value={value}
+          format={format}
+        />
+      )
+    })
+  }
+
   const dispatch = useDispatch()
   const [searchCatastro, setSearchCatastro] = useState('')
   const [isSearching, setIsSearching] = useState(false)
@@ -239,37 +285,33 @@ const BasicData = () => {
       {isSelected && (
         <Box>
           {!!photoData?.length && <Carrousel photos={photoData} />}
-          {getBasicData().map(({ title, fill, format, isNumber }, index) => {
-            const fills = fill.split(',')
-            const value = []
+          {renderDetailsItems(generalData)}
 
-            const valueFill =
-              fill === 'superficie_parcela'
-                ? superficieParcela?.toString()
-                : data[fills[0]]
-            if (valueFill !== undefined && valueFill !== null && valueFill !== '') {
-              value.push(
-                isNumber
-                  ? Number.parseFloat(valueFill).toLocaleString('es-AR')
-                  : valueFill
-              )
-            }
-            if (format === 'url' && linkImagen) {
-              value.push(linkImagen[fills[0]])
-              value.push(...fills)
-            }
-            return (
-              <Details
-                // eslint-disable-next-line react/no-array-index-key
-                key={title}
-                styles={styles}
-                decorators={decorators}
-                title={title}
-                value={value}
-                format={format}
-              />
-            )
-          })}
+          {propiedadData.length > 0 && (
+            <Accordion sx={{ mt: 2, borderRadius: 2, '&:before': { display: 'none' }, border: '1px solid rgba(0,0,0,0.08)' }}>
+              <AccordionSummary expandIcon={<ExpandMoreIcon />} sx={{ backgroundColor: '#f9fafb', borderRadius: 2 }}>
+                <Typography variant="subtitle2" sx={{ ...decorators.bold, color: '#1a237e' }}>
+                  Datos de Propiedad
+                </Typography>
+              </AccordionSummary>
+              <AccordionDetails sx={{ p: 1.5, pb: 0 }}>
+                {renderDetailsItems(propiedadData)}
+              </AccordionDetails>
+            </Accordion>
+          )}
+
+          {serviciosData.length > 0 && (
+            <Accordion sx={{ mt: 2, borderRadius: 2, '&:before': { display: 'none' }, border: '1px solid rgba(0,0,0,0.08)' }}>
+              <AccordionSummary expandIcon={<ExpandMoreIcon />} sx={{ backgroundColor: '#f9fafb', borderRadius: 2 }}>
+                <Typography variant="subtitle2" sx={{ ...decorators.bold, color: '#1a237e' }}>
+                  Servicios
+                </Typography>
+              </AccordionSummary>
+              <AccordionDetails sx={{ p: 1.5, pb: 0 }}>
+                {renderDetailsItems(serviciosData)}
+              </AccordionDetails>
+            </Accordion>
+          )}
           {constitucionEstadoParcelario?.data.length > 0 &&
             constitucionEstadoParcelario.data.map((data) => (
               <Box
