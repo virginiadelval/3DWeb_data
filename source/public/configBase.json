@@ -1042,20 +1042,10 @@
       "color": "#34485e",
       "info": "Esta es aportada por distintas fuentes. Si los datos plasmados no coinciden con la realidad, se solicita ratificarlos ante dicho organismo."
     },
-     {
-      "id": "IFC",
-      "title": "Verificá tu proyecto",
-      "color": "rgb(132, 142, 195)"
-    },
     {
       "id": "Works",
       "title": "Obras Registradas",
       "color": "#04bf9a"
-    },
-    {
-      "id": "Inspections",
-      "title": "Inspecciones",
-      "color": "#b600b7"
     }
   ],
   "normative": [
@@ -2435,7 +2425,7 @@
         "type": "raster",
         "source": "capabase_1",
         "layout": {
-          "visibility": "visible"
+          "visibility": "none"
         },
         "paint": {}
       },
@@ -2444,7 +2434,7 @@
         "type": "raster",
         "source": "capabase_2",
         "layout": {
-          "visibility": "none"
+          "visibility": "visible"
         },
         "paint": {}
       },

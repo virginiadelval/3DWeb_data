@@ -76,7 +76,7 @@ const Map = ({ children }) => {
   const [mapGL, setMapGL] = useState(null)
 
   const dispatch = useDispatch()
-  const [activeBaseLayer, setActiveBaseLayer] = useState('baseLayer_principal')
+  const [activeBaseLayer, setActiveBaseLayer] = useState('baseLayer_secundario')
 
   useEffect(() => {
     if (isMapReady && cameraLat) {

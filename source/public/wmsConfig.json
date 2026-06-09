@@ -26,15 +26,15 @@
     "boundingBox": [[-65.50, -24.89], [-65.34, -24.70]]
   },
   {
-    "id": "wms_catastros",
-    "name": "Parcelario",
+    "id": "wms_zonificacion",
+    "name": "Zonificación de Usos del Suelo",
     "url": "https://geocloud.municipalidadsalta.gob.ar/geoserver/wms",
-    "layers": "public:catastros_Ene2025",
+    "layers": "public:Zonificacion_CPUA2025_CGO_15102025",
     "format": "image/png",
     "transparent": true,
     "version": "1.1.1",
     "visible": true,
-    "opacity": 0.8,
+    "opacity": 0.1,
     "getFeatureInfo": true,
     "boundingBox": [[-65.50, -24.89], [-65.34, -24.70]]
   },
@@ -52,15 +52,15 @@
     "boundingBox": [[-65.50, -24.89], [-65.34, -24.70]]
   },
   {
-    "id": "wms_zonificacion",
-    "name": "Zonificación de Usos del Suelo",
+    "id": "wms_catastros",
+    "name": "Parcelario",
     "url": "https://geocloud.municipalidadsalta.gob.ar/geoserver/wms",
-    "layers": "public:Zonificacion_CPUA2025_CGO_15102025",
+    "layers": "public:catastros_Ene2025",
     "format": "image/png",
     "transparent": true,
     "version": "1.1.1",
     "visible": true,
-    "opacity": 0.6,
+    "opacity": 0.8,
     "getFeatureInfo": true,
     "boundingBox": [[-65.50, -24.89], [-65.34, -24.70]]
   },
