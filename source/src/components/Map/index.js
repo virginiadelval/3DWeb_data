@@ -29,14 +29,15 @@ import imgCapaBaseArgenmap from 'img/capabase_3.png'
 import PropTypes from 'prop-types'
 import styles from './styles'
 
-const MinimapOption = ({ imageUrl, text, children, ...otherProps }) => {
+const MinimapOption = ({ imageUrl, text, children, style, ...otherProps }) => {
   return (
     <>
       <Box
         data-tour="minimap"
         sx={styles.minimapLayer}
         style={{
-          backgroundImage: imageUrl
+          backgroundImage: imageUrl,
+          ...style
         }}
         {...otherProps}
       >
