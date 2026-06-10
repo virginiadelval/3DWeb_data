@@ -303,6 +303,8 @@ const getCamera = () => config.camera
 const getArticlesData = (idArticle) =>
   config.articles.find(({ id }) => id === idArticle)
 
+const getCustomDbApiUrl = () => config.customDbApiUrl || 'http://localhost:3001'
+
 export {
   loadAppConfig,
   getCategories,
@@ -340,5 +342,6 @@ export {
   getArticlesData,
   getNormative,
   getImagesToLoad,
-  getImagesToMerge
+  getImagesToMerge,
+  getCustomDbApiUrl
 }

@@ -1,6 +1,7 @@
 /* eslint-disable camelcase */
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit'
 import buildPDF from 'utils/reportTemplate'
+import { getCustomDbApiUrl } from 'utils/configQueries'
 
 const decodeCodLink = (codLink) => {
   const defaults = {
@@ -254,7 +255,7 @@ const getData = createAsyncThunk(
 
       if (finalDistrito && finalDistrito !== 'N/A' && finalDistrito !== 'No disponible') {
         try {
-          const regUrl = `http://localhost:3001/api/regimen/${encodeURIComponent(finalDistrito.trim())}`
+          const regUrl = `${getCustomDbApiUrl()}/api/regimen/${encodeURIComponent(finalDistrito.trim())}`
           const regRes = await fetch(regUrl)
           if (regRes.ok) {
             dbRegimen = await regRes.json()
@@ -264,7 +265,7 @@ const getData = createAsyncThunk(
         }
 
         try {
-          const actUrl = `http://localhost:3001/api/actividades/${encodeURIComponent(finalDistrito.trim())}`
+          const actUrl = `${getCustomDbApiUrl()}/api/actividades/${encodeURIComponent(finalDistrito.trim())}`
           const actRes = await fetch(actUrl)
           if (actRes.ok) {
             dbActividades = await actRes.json()

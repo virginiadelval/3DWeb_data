@@ -13,6 +13,7 @@ import { actions as smpActions } from 'state/ducks/parcel'
 import { actions as buildActions } from 'state/ducks/buildable'
 import { actions as usesActions } from 'state/ducks/uses'
 import { setModelCoordinates } from './IFC'
+import { getCustomDbApiUrl } from 'utils/configQueries'
 
 const cameraUpdated = (data, dispatch) => {
   const [lng, lat] = data.centroide
@@ -302,7 +303,7 @@ const getData = async ({ coord, smp }) => {
 
   if (finalDistrito && finalDistrito !== 'N/A' && finalDistrito !== 'No disponible') {
     try {
-      const regUrl = `http://localhost:3001/api/regimen/${encodeURIComponent(finalDistrito.trim())}`
+      const regUrl = `${getCustomDbApiUrl()}/api/regimen/${encodeURIComponent(finalDistrito.trim())}`
       const regRes = await fetch(regUrl)
       if (regRes.ok) {
         dbRegimen = await regRes.json()
@@ -312,7 +313,7 @@ const getData = async ({ coord, smp }) => {
     }
 
     try {
-      const actUrl = `http://localhost:3001/api/actividades/${encodeURIComponent(finalDistrito.trim())}`
+      const actUrl = `${getCustomDbApiUrl()}/api/actividades/${encodeURIComponent(finalDistrito.trim())}`
       const actRes = await fetch(actUrl)
       if (actRes.ok) {
         dbActividades = await actRes.json()
